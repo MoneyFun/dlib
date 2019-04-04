@@ -561,10 +561,6 @@ if (NOT TARGET dlib)
             message(STATUS "Disabling DLIB_USE_MKL_SEQUENTIAL. It cannot be used simultaneously with DLIB_USE_MKL_WITH_TBB.")
          endif()
 
-
-         # Try to find BLAS, LAPACK and MKL
-         include(cmake_utils/find_blas.cmake)
-
          if (DLIB_USE_BLAS)
             if (blas_found)
                set (dlib_needed_libraries ${dlib_needed_libraries} ${blas_libraries})
