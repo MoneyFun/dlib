@@ -4,11 +4,11 @@
     This example program shows how to find frontal human faces in an image and
     estimate their pose.  The pose takes the form of 68 landmarks.  These are
     points on the face such as the corners of the mouth, along the eyebrows, on
-    the eyes, and so forth.  
-    
+    the eyes, and so forth.
+
 
     This example is essentially just a version of the face_landmark_detection_ex.cpp
-    example modified to use OpenCV's VideoCapture object to read from a camera instead 
+    example modified to use OpenCV's VideoCapture object to read from a camera instead
     of files.
 
 
@@ -24,7 +24,7 @@
     Studio, or the Intel compiler.  If you are using another compiler then you
     need to consult your compiler's manual to determine how to enable these
     instructions.  Note that AVX is the fastest but requires a CPU from at least
-    2011.  SSE4 is the next fastest and is supported by most current machines.  
+    2011.  SSE4 is the next fastest and is supported by most current machines.
 */
 
 #include <dlib/opencv.h>
@@ -33,6 +33,7 @@
 #include <dlib/image_processing/render_face_detections.h>
 #include <dlib/image_processing.h>
 #include <dlib/gui_widgets.h>
+#include "model_utils.hpp"
 
 using namespace dlib;
 using namespace std;
@@ -53,7 +54,7 @@ int main()
         // Load face detection and pose estimation models.
         frontal_face_detector detector = get_frontal_face_detector();
         shape_predictor pose_model;
-        deserialize("shape_predictor_68_face_landmarks.dat") >> pose_model;
+        med::load_shape_predictor_model(pose_model, "shape_predictor_68_face_landmarks_small.dat");
 
         // Grab and process frames until the main window is closed by the user.
         while(!win.is_closed())
@@ -72,7 +73,7 @@ int main()
             // while using cimg.
             cv_image<bgr_pixel> cimg(temp);
 
-            // Detect faces 
+            // Detect faces
             std::vector<rectangle> faces = detector(cimg);
             // Find the pose of each face.
             std::vector<full_object_detection> shapes;

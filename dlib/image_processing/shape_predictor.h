@@ -145,12 +145,12 @@ namespace dlib
         inline void create_shape_relative_encoding (
             const matrix<float,0,1>& shape,
             const std::vector<dlib::vector<float,2> >& pixel_coordinates,
-            std::vector<unsigned long>& anchor_idx, 
+            std::vector<unsigned long>& anchor_idx,
             std::vector<dlib::vector<float,2> >& deltas
         )
         /*!
             requires
-                - shape.size()%2 == 0 
+                - shape.size()%2 == 0
                 - shape.size() > 0
             ensures
                 - #anchor_idx.size() == pixel_coordinates.size()
@@ -247,7 +247,7 @@ namespace dlib
         /*!
             requires
                 - image_type == an image object that implements the interface defined in
-                  dlib/image_processing/generic_image.h 
+                  dlib/image_processing/generic_image.h
                 - reference_pixel_anchor_idx.size() == reference_pixel_deltas.size()
                 - current_shape.size() == reference_shape.size()
                 - reference_shape.size()%2 == 0
@@ -290,7 +290,7 @@ namespace dlib
 
 
         shape_predictor (
-        ) 
+        )
         {}
 
         shape_predictor (
@@ -304,7 +304,7 @@ namespace dlib
                 - forests.size() == pixel_coordinates.size() == the number of cascades
                 - for all valid i:
                     - all the index values in forests[i] are less than pixel_coordinates[i].size()
-                - for all valid i and j: 
+                - for all valid i and j:
                     - forests[i][j].leaf_values.size() is a power of 2.
                       (i.e. we require a tree with all the levels fully filled out.
                     - forests[i][j].leaf_values.size() == forests[i][j].splits.size()+1
@@ -401,10 +401,9 @@ namespace dlib
 
         friend void deserialize (shape_predictor& item, std::istream& in);
 
-    private:
         matrix<float,0,1> initial_shape;
         std::vector<std::vector<impl::regression_tree> > forests;
-        std::vector<std::vector<unsigned long> > anchor_idx; 
+        std::vector<std::vector<unsigned long> > anchor_idx;
         std::vector<std::vector<dlib::vector<float,2> > > deltas;
     };
 
@@ -450,14 +449,14 @@ namespace dlib
         DLIB_CASSERT( images.size() == objects.size() ,
             "\t double test_shape_predictor()"
             << "\n\t Invalid inputs were given to this function. "
-            << "\n\t images.size():  " << images.size() 
-            << "\n\t objects.size(): " << objects.size() 
+            << "\n\t images.size():  " << images.size()
+            << "\n\t objects.size(): " << objects.size()
         );
         for (unsigned long i = 0; i < objects.size(); ++i)
         {
             for (unsigned long j = 0; j < objects[i].size(); ++j)
             {
-                DLIB_CASSERT(objects[i][j].num_parts() == sp.num_parts(), 
+                DLIB_CASSERT(objects[i][j].num_parts() == sp.num_parts(),
                     "\t double test_shape_predictor()"
                     << "\n\t Invalid inputs were given to this function. "
                     << "\n\t objects["<<i<<"]["<<j<<"].num_parts(): " << objects[i][j].num_parts()
@@ -466,7 +465,7 @@ namespace dlib
             }
             if (scales.size() != 0)
             {
-                DLIB_CASSERT(objects[i].size() == scales[i].size(), 
+                DLIB_CASSERT(objects[i].size() == scales[i].size(),
                     "\t double test_shape_predictor()"
                     << "\n\t Invalid inputs were given to this function. "
                     << "\n\t objects["<<i<<"].size(): " << objects[i].size()
@@ -484,7 +483,7 @@ namespace dlib
             {
                 // Just use a scale of 1 (i.e. no scale at all) if the caller didn't supply
                 // any scales.
-                const double scale = scales.size()==0 ? 1 : scales[i][j]; 
+                const double scale = scales.size()==0 ? 1 : scales[i][j];
 
                 full_object_detection det = sp(images[i], objects[i][j].get_rect());
 
