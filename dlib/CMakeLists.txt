@@ -268,7 +268,6 @@ if (NOT TARGET dlib)
          dir_nav/dir_nav_kernel_1.cpp
          dir_nav/dir_nav_kernel_2.cpp
          dir_nav/dir_nav_extensions.cpp
-         linker/linker_kernel_1.cpp
          logger/extra_logger_headers.cpp
          logger/logger_kernel_1.cpp
          logger/logger_config_file.cpp
