@@ -49,15 +49,13 @@ int main()
             return 1;
         }
 
-        image_window win;
-
         // Load face detection and pose estimation models.
         frontal_face_detector detector = get_frontal_face_detector();
         shape_predictor pose_model;
         med::load_shape_predictor_model(pose_model, "shape_predictor_68_face_landmarks_small.dat");
 
         // Grab and process frames until the main window is closed by the user.
-        while(!win.is_closed())
+        while(1)
         {
             // Grab a frame
             cv::Mat temp;
@@ -81,13 +79,10 @@ int main()
                 shapes.push_back(pose_model(cimg, faces[i]));
 
             // Display it all on the screen
-            win.clear_overlay();
-            win.set_image(cimg);
-            win.add_overlay(render_face_detections(shapes));
+            cv::imshow("dlib", temp);
+            cv::waitKey(1);
         }
-    }
-    catch(serialization_error& e)
-    {
+    } catch(serialization_error& e) {
         cout << "You need dlib's default face landmarking model file to run this example." << endl;
         cout << "You can get it from the following URL: " << endl;
         cout << "   http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2" << endl;

@@ -322,12 +322,6 @@ if (NOT TARGET dlib)
 
       if (NOT DLIB_NO_GUI_SUPPORT)
          set(source_files ${source_files}
-            gui_widgets/fonts.cpp
-            gui_widgets/widgets.cpp
-            gui_widgets/drawable.cpp
-            gui_widgets/canvas_drawing.cpp
-            gui_widgets/style.cpp
-            gui_widgets/base_widgets.cpp
             gui_core/gui_core_kernel_1.cpp
             gui_core/gui_core_kernel_2.cpp
             )
