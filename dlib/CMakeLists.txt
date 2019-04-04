@@ -173,8 +173,6 @@ if (NOT TARGET dlib)
       "Disable this if you don't want to link against libpng" )
    set (DLIB_GIF_SUPPORT_STR
       "Disable this if you don't want to link against libgif" )
-   set (DLIB_JPEG_SUPPORT_STR
-      "Disable this if you don't want to link against libjpeg" )
    set (DLIB_LINK_WITH_SQLITE3_STR
       "Disable this if you don't want to link against sqlite3" )
    #set (DLIB_USE_FFTW_STR "Disable this if you don't want to link against fftw" )
@@ -223,28 +221,14 @@ if (NOT TARGET dlib)
       endif()
    endif()
 
-   if (DLIB_ISO_CPP_ONLY)
-      option(DLIB_JPEG_SUPPORT ${DLIB_JPEG_SUPPORT_STR} OFF)
-      option(DLIB_LINK_WITH_SQLITE3 ${DLIB_LINK_WITH_SQLITE3_STR} OFF)
-      option(DLIB_USE_BLAS ${DLIB_USE_BLAS_STR} OFF)
-      option(DLIB_USE_LAPACK ${DLIB_USE_LAPACK_STR} OFF)
-      option(DLIB_USE_CUDA ${DLIB_USE_CUDA_STR} OFF)
-      option(DLIB_PNG_SUPPORT ${DLIB_PNG_SUPPORT_STR} OFF)
-      option(DLIB_GIF_SUPPORT ${DLIB_GIF_SUPPORT_STR} OFF)
-      #option(DLIB_USE_FFTW ${DLIB_USE_FFTW_STR} OFF)
-      option(DLIB_USE_MKL_FFT ${DLIB_USE_MKL_FFT_STR} OFF)
-   else()
-      option(DLIB_JPEG_SUPPORT ${DLIB_JPEG_SUPPORT_STR} ON)
-      option(DLIB_LINK_WITH_SQLITE3 ${DLIB_LINK_WITH_SQLITE3_STR} ON)
-      option(DLIB_USE_BLAS ${DLIB_USE_BLAS_STR} OFF)
-      option(DLIB_USE_LAPACK ${DLIB_USE_LAPACK_STR} OFF)
-      option(DLIB_USE_CUDA ${DLIB_USE_CUDA_STR} OFF)
-      option(DLIB_PNG_SUPPORT ${DLIB_PNG_SUPPORT_STR} ON)
-      option(DLIB_GIF_SUPPORT ${DLIB_GIF_SUPPORT_STR} ON)
-      #option(DLIB_USE_FFTW ${DLIB_USE_FFTW_STR} ON)
-      option(DLIB_USE_MKL_FFT ${DLIB_USE_MKL_FFT_STR} ON)
-   endif()
-   toggle_preprocessor_switch(DLIB_JPEG_SUPPORT)
+   option(DLIB_LINK_WITH_SQLITE3 ${DLIB_LINK_WITH_SQLITE3_STR} ON)
+   option(DLIB_USE_BLAS ${DLIB_USE_BLAS_STR} OFF)
+   option(DLIB_USE_LAPACK ${DLIB_USE_LAPACK_STR} OFF)
+   option(DLIB_USE_CUDA ${DLIB_USE_CUDA_STR} OFF)
+   option(DLIB_PNG_SUPPORT ${DLIB_PNG_SUPPORT_STR} ON)
+   option(DLIB_GIF_SUPPORT ${DLIB_GIF_SUPPORT_STR} ON)
+   #option(DLIB_USE_FFTW ${DLIB_USE_FFTW_STR} ON)
+   option(DLIB_USE_MKL_FFT ${DLIB_USE_MKL_FFT_STR} ON)
    toggle_preprocessor_switch(DLIB_USE_BLAS)
    toggle_preprocessor_switch(DLIB_USE_LAPACK)
    toggle_preprocessor_switch(DLIB_USE_CUDA)
@@ -293,8 +277,6 @@ if (NOT TARGET dlib)
          logger/logger_config_file.cpp
          misc_api/misc_api_kernel_1.cpp
          misc_api/misc_api_kernel_2.cpp
-         sockstreambuf/sockstreambuf.cpp
-         sockstreambuf/sockstreambuf_unbuffered.cpp
          threads/multithreaded_object_extension.cpp
          threads/threaded_object_extension.cpp
          threads/threads_kernel_1.cpp
@@ -304,8 +286,6 @@ if (NOT TARGET dlib)
          threads/async.cpp
          timer/timer.cpp
          stack_trace.cpp
-         cuda/cpu_dlib.cpp
-         cuda/tensor_tools.cpp
          )
 
       if(UNIX)
@@ -411,142 +391,6 @@ if (NOT TARGET dlib)
       endif()
 
       INCLUDE (CheckFunctionExists)
-
-      if (DLIB_GIF_SUPPORT)
-         find_package(GIF QUIET)
-         if (GIF_FOUND)
-            set (dlib_needed_includes ${dlib_needed_includes} ${GIF_INCLUDE_DIR})
-            set (dlib_needed_libraries ${dlib_needed_libraries} ${GIF_LIBRARY})
-         else()
-            set(DLIB_GIF_SUPPORT OFF CACHE STRING ${DLIB_GIF_SUPPORT_STR} FORCE )
-            toggle_preprocessor_switch(DLIB_GIF_SUPPORT)
-         endif()
-      endif()
-
-      if (DLIB_PNG_SUPPORT)
-         include(cmake_utils/find_libpng.cmake)
-         if (PNG_FOUND)
-            include_directories(${PNG_INCLUDE_DIR})
-            set (dlib_needed_libraries ${dlib_needed_libraries} ${PNG_LIBRARIES})
-            set(REQUIRES_LIBS " libpng")
-         else()
-            # If we can't find libpng then statically compile it in.
-            include_directories(external/libpng external/zlib)
-            set(source_files ${source_files}
-               external/libpng/arm/arm_init.c
-               external/libpng/arm/filter_neon_intrinsics.c
-               external/libpng/png.c
-               external/libpng/pngerror.c
-               external/libpng/pngget.c
-               external/libpng/pngmem.c
-               external/libpng/pngpread.c
-               external/libpng/pngread.c
-               external/libpng/pngrio.c
-               external/libpng/pngrtran.c
-               external/libpng/pngrutil.c
-               external/libpng/pngset.c
-               external/libpng/pngtrans.c
-               external/libpng/pngwio.c
-               external/libpng/pngwrite.c
-               external/libpng/pngwtran.c
-               external/libpng/pngwutil.c
-               external/zlib/adler32.c
-               external/zlib/compress.c
-               external/zlib/crc32.c
-               external/zlib/deflate.c
-               external/zlib/gzclose.c
-               external/zlib/gzlib.c
-               external/zlib/gzread.c
-               external/zlib/gzwrite.c
-               external/zlib/infback.c
-               external/zlib/inffast.c
-               external/zlib/inflate.c
-               external/zlib/inftrees.c
-               external/zlib/trees.c
-               external/zlib/uncompr.c
-               external/zlib/zutil.c
-               )
-
-            include(cmake_utils/check_if_neon_available.cmake)
-            if (ARM_NEON_IS_AVAILABLE)
-               message (STATUS "NEON instructions will be used for libpng.")
-               enable_language(ASM)
-               set(source_files ${source_files}
-                  external/libpng/arm/arm_init.c
-                  external/libpng/arm/filter_neon_intrinsics.c
-                  external/libpng/arm/filter_neon.S
-                  )
-               set_source_files_properties(external/libpng/arm/filter_neon.S PROPERTIES COMPILE_FLAGS "${CMAKE_ASM_FLAGS} ${CMAKE_CXX_FLAGS} -x assembler-with-cpp")
-            endif()
-            set(REQUIRES_LIBS "")
-         endif()
-         set(source_files ${source_files}
-            image_loader/png_loader.cpp
-            image_saver/save_png.cpp
-            )
-      endif()
-
-      if (DLIB_JPEG_SUPPORT)
-         include(cmake_utils/find_libjpeg.cmake)
-         if (JPEG_FOUND)
-            include_directories(${JPEG_INCLUDE_DIR})
-            set (dlib_needed_libraries ${dlib_needed_libraries} ${JPEG_LIBRARY})
-         else()
-            # If we can't find libjpeg then statically compile it in.
-            add_definitions(-DDLIB_JPEG_STATIC)
-            set(source_files ${source_files}
-               external/libjpeg/jcomapi.cpp
-               external/libjpeg/jdapimin.cpp
-               external/libjpeg/jdapistd.cpp
-               external/libjpeg/jdatasrc.cpp
-               external/libjpeg/jdcoefct.cpp
-               external/libjpeg/jdcolor.cpp
-               external/libjpeg/jddctmgr.cpp
-               external/libjpeg/jdhuff.cpp
-               external/libjpeg/jdinput.cpp
-               external/libjpeg/jdmainct.cpp
-               external/libjpeg/jdmarker.cpp
-               external/libjpeg/jdmaster.cpp
-               external/libjpeg/jdmerge.cpp
-               external/libjpeg/jdphuff.cpp
-               external/libjpeg/jdpostct.cpp
-               external/libjpeg/jdsample.cpp
-               external/libjpeg/jerror.cpp
-               external/libjpeg/jidctflt.cpp
-               external/libjpeg/jidctfst.cpp
-               external/libjpeg/jidctint.cpp
-               external/libjpeg/jidctred.cpp
-               external/libjpeg/jmemmgr.cpp
-               external/libjpeg/jmemnobs.cpp
-               external/libjpeg/jquant1.cpp
-               external/libjpeg/jquant2.cpp
-               external/libjpeg/jutils.cpp
-               external/libjpeg/jcapimin.cpp
-               external/libjpeg/jdatadst.cpp
-               external/libjpeg/jcparam.cpp
-               external/libjpeg/jcapistd.cpp
-               external/libjpeg/jcmarker.cpp
-               external/libjpeg/jcinit.cpp
-               external/libjpeg/jcmaster.cpp
-               external/libjpeg/jcdctmgr.cpp
-               external/libjpeg/jccoefct.cpp
-               external/libjpeg/jccolor.cpp
-               external/libjpeg/jchuff.cpp
-               external/libjpeg/jcmainct.cpp
-               external/libjpeg/jcphuff.cpp
-               external/libjpeg/jcprepct.cpp
-               external/libjpeg/jcsample.cpp
-               external/libjpeg/jfdctint.cpp
-               external/libjpeg/jfdctflt.cpp
-               external/libjpeg/jfdctfst.cpp
-               )
-         endif()
-         set(source_files ${source_files}
-            image_loader/jpeg_loader.cpp
-            image_saver/save_jpeg.cpp
-            )
-      endif()
-
 
       if (DLIB_USE_BLAS OR DLIB_USE_LAPACK OR DLIB_USE_MKL_FFT)
          if (DLIB_USE_MKL_WITH_TBB AND DLIB_USE_MKL_SEQUENTIAL)
