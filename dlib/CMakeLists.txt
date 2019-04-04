@@ -250,8 +250,6 @@ if (NOT TARGET dlib)
       md5/md5_kernel_1.cpp
       tokenizer/tokenizer_kernel_1.cpp
       unicode/unicode.cpp
-      data_io/image_dataset_metadata.cpp
-      data_io/mnist.cpp
       global_optimization/global_function_search.cpp
       filtering/kalman_filter.cpp
       test_for_odr_violations.cpp
@@ -267,7 +265,6 @@ if (NOT TARGET dlib)
    else()
 
       set(source_files ${source_files}
-         bsp/bsp.cpp
          dir_nav/dir_nav_kernel_1.cpp
          dir_nav/dir_nav_kernel_2.cpp
          dir_nav/dir_nav_extensions.cpp
