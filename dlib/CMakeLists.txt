@@ -44,13 +44,7 @@ include(cmake_utils/release_build_by_default)
 include(cmake_utils/use_cpp_11.cmake)
 
 # Set DLIB_VERSION in the including CMake file so they can use it to do whatever they want.
-get_directory_property(has_parent PARENT_DIRECTORY)
-if(has_parent)
-   set(DLIB_VERSION ${VERSION} PARENT_SCOPE)
-   if (NOT DEFINED DLIB_IN_PROJECT_BUILD)
-      set(DLIB_IN_PROJECT_BUILD true)
-   endif()
-endif()
+set(DLIB_VERSION ${VERSION} PARENT_SCOPE)
 
 set (BUILDING_PYTHON_IN_MSVC false)
 
@@ -88,15 +82,7 @@ endif()
 # Tell cmake to build dlib as a static library
 set(BUILD_SHARED_LIBS false)
 
-
-if (CMAKE_VERSION VERSION_LESS "3.9.0")
-   # Set only because there are old target_link_libraries() statements in the
-   # FindCUDA.cmake file that comes with CMake that error out if the new behavior
-   # is used.  In newer versions of CMake we can instead set CUDA_LINK_LIBRARIES_KEYWORD which fixes this issue.
-   cmake_policy(SET CMP0023 OLD)
-else()
-   set(CUDA_LINK_LIBRARIES_KEYWORD PUBLIC)
-endif()
+set(CUDA_LINK_LIBRARIES_KEYWORD PUBLIC)
 
 
 macro (enable_preprocessor_switch option_name)
@@ -130,8 +116,6 @@ if (NOT TARGET dlib)
       "Enable this if you don't want to compile any non-ISO C++ code (i.e. you don't use any of the API Wrappers)" )
    set (DLIB_ENABLE_STACK_TRACE_STR
       "Enable this if you want to turn on the DLIB_STACK_TRACE macros" )
-   set (DLIB_USE_LAPACK_STR
-      "Disable this if you don't want to use a LAPACK library" )
    set (DLIB_USE_MKL_SEQUENTIAL_STR
       "Enable this if you have MKL installed and want to use the sequential version instead of the multi-core version." )
    set (DLIB_USE_MKL_WITH_TBB_STR
@@ -172,11 +156,9 @@ if (NOT TARGET dlib)
    # is only needed when building and installing dlib as a separately
    # installed library.  It doesn't matter when doing an in project build.
 
-   option(DLIB_USE_LAPACK ${DLIB_USE_LAPACK_STR} OFF)
    option(DLIB_PNG_SUPPORT ${DLIB_PNG_SUPPORT_STR} ON)
    option(DLIB_GIF_SUPPORT ${DLIB_GIF_SUPPORT_STR} ON)
    option(DLIB_USE_MKL_FFT ${DLIB_USE_MKL_FFT_STR} ON)
-   toggle_preprocessor_switch(DLIB_USE_LAPACK)
    toggle_preprocessor_switch(DLIB_PNG_SUPPORT)
    toggle_preprocessor_switch(DLIB_GIF_SUPPORT)
    toggle_preprocessor_switch(DLIB_USE_MKL_FFT)
@@ -194,7 +176,6 @@ if (NOT TARGET dlib)
       md5/md5_kernel_1.cpp
       tokenizer/tokenizer_kernel_1.cpp
       unicode/unicode.cpp
-      test_for_odr_violations.cpp
       )
 
 
@@ -223,27 +204,11 @@ if (NOT TARGET dlib)
 
    INCLUDE (CheckFunctionExists)
 
-   if (DLIB_USE_LAPACK OR DLIB_USE_MKL_FFT)
+   if (DLIB_USE_MKL_FFT)
       if (DLIB_USE_MKL_WITH_TBB AND DLIB_USE_MKL_SEQUENTIAL)
          set(DLIB_USE_MKL_SEQUENTIAL OFF CACHE STRING ${DLIB_USE_MKL_SEQUENTIAL_STR} FORCE )
          toggle_preprocessor_switch(DLIB_USE_MKL_SEQUENTIAL)
          message(STATUS "Disabling DLIB_USE_MKL_SEQUENTIAL. It cannot be used simultaneously with DLIB_USE_MKL_WITH_TBB.")
-      endif()
-
-      if (DLIB_USE_LAPACK)
-         if (lapack_found)
-            set (dlib_needed_libraries ${dlib_needed_libraries} ${lapack_libraries})
-            if (lapack_with_underscore)
-               set(LAPACK_FORCE_UNDERSCORE 1)
-               enable_preprocessor_switch(LAPACK_FORCE_UNDERSCORE)
-            elseif (lapack_without_underscore)
-               set(LAPACK_FORCE_NOUNDERSCORE 1)
-               enable_preprocessor_switch(LAPACK_FORCE_NOUNDERSCORE)
-            endif ()
-         else()
-            set(DLIB_USE_LAPACK OFF CACHE STRING ${DLIB_USE_LAPACK_STR} FORCE )
-            toggle_preprocessor_switch(DLIB_USE_LAPACK)
-         endif()
       endif()
 
       if (DLIB_USE_MKL_FFT)
