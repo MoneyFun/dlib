@@ -6,7 +6,7 @@
 #endif
 
 #ifndef DLIB_IMAGE_PROCESSInG_H_h_
-#define DLIB_IMAGE_PROCESSInG_H_h_ 
+#define DLIB_IMAGE_PROCESSInG_H_h_
 
 #include "image_processing/scan_image.h"
 #include "image_processing/scan_image_pyramid.h"
@@ -17,7 +17,6 @@
 #include "image_processing/setup_hashed_features.h"
 #include "image_processing/scan_image_boxes.h"
 #include "image_processing/scan_image_custom.h"
-#include "image_processing/remove_unobtainable_rectangles.h"
 #include "image_processing/scan_fhog_pyramid.h"
 #include "image_processing/shape_predictor.h"
 #include "image_processing/shape_predictor_trainer.h"
