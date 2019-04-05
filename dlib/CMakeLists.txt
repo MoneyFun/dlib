@@ -258,8 +258,6 @@ if (NOT TARGET dlib)
    else()
 
       set(source_files ${source_files}
-         misc_api/misc_api_kernel_1.cpp
-         misc_api/misc_api_kernel_2.cpp
          timer/timer.cpp
          stack_trace.cpp
          )
