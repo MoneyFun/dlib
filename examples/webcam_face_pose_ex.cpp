@@ -31,7 +31,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <dlib/image_processing/frontal_face_detector.h>
-// #include <dlib/image_processing.h>
 #include "model_utils.hpp"
 
 using namespace dlib;

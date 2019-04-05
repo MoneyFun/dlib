@@ -258,9 +258,6 @@ if (NOT TARGET dlib)
    else()
 
       set(source_files ${source_files}
-         logger/extra_logger_headers.cpp
-         logger/logger_kernel_1.cpp
-         logger/logger_config_file.cpp
          misc_api/misc_api_kernel_1.cpp
          misc_api/misc_api_kernel_2.cpp
          timer/timer.cpp
