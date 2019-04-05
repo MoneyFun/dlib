@@ -253,116 +253,102 @@ if (NOT TARGET dlib)
    set(dlib_needed_libraries)
    set(dlib_needed_includes)
 
-   if (DLIB_ISO_CPP_ONLY)
-      add_library(dlib ${source_files} )
-   else()
+   if(UNIX)
+      set(CMAKE_THREAD_PREFER_PTHREAD ON)
+      find_package(Threads REQUIRED)
+      set(dlib_needed_libraries ${dlib_needed_libraries} ${CMAKE_THREAD_LIBS_INIT})
+   endif()
 
-      set(source_files ${source_files}
-         timer/timer.cpp
-         stack_trace.cpp
-         )
+   # link to the nsl library if it exists.  this is something you need sometimes
+   find_library(nsllib nsl)
+   if (nsllib)
+      set (dlib_needed_libraries ${dlib_needed_libraries} ${nsllib})
+   endif ()
 
-      if(UNIX)
-         set(CMAKE_THREAD_PREFER_PTHREAD ON)
-         find_package(Threads REQUIRED)
-         set(dlib_needed_libraries ${dlib_needed_libraries} ${CMAKE_THREAD_LIBS_INIT})
+   # link to the socket library if it exists.  this is something you need on solaris
+   find_library(socketlib socket)
+   if (socketlib)
+      set (dlib_needed_libraries ${dlib_needed_libraries} ${socketlib})
+   endif ()
+
+   mark_as_advanced(nsllib pthreadlib socketlib)
+
+   INCLUDE (CheckFunctionExists)
+
+   if (DLIB_USE_BLAS OR DLIB_USE_LAPACK OR DLIB_USE_MKL_FFT)
+      if (DLIB_USE_MKL_WITH_TBB AND DLIB_USE_MKL_SEQUENTIAL)
+         set(DLIB_USE_MKL_SEQUENTIAL OFF CACHE STRING ${DLIB_USE_MKL_SEQUENTIAL_STR} FORCE )
+         toggle_preprocessor_switch(DLIB_USE_MKL_SEQUENTIAL)
+         message(STATUS "Disabling DLIB_USE_MKL_SEQUENTIAL. It cannot be used simultaneously with DLIB_USE_MKL_WITH_TBB.")
       endif()
 
-      # link to the nsl library if it exists.  this is something you need sometimes
-      find_library(nsllib nsl)
-      if (nsllib)
-         set (dlib_needed_libraries ${dlib_needed_libraries} ${nsllib})
-      endif ()
-
-      # link to the socket library if it exists.  this is something you need on solaris
-      find_library(socketlib socket)
-      if (socketlib)
-         set (dlib_needed_libraries ${dlib_needed_libraries} ${socketlib})
-      endif ()
-
-      mark_as_advanced(nsllib pthreadlib socketlib)
-
-      INCLUDE (CheckFunctionExists)
-
-      if (DLIB_USE_BLAS OR DLIB_USE_LAPACK OR DLIB_USE_MKL_FFT)
-         if (DLIB_USE_MKL_WITH_TBB AND DLIB_USE_MKL_SEQUENTIAL)
-            set(DLIB_USE_MKL_SEQUENTIAL OFF CACHE STRING ${DLIB_USE_MKL_SEQUENTIAL_STR} FORCE )
-            toggle_preprocessor_switch(DLIB_USE_MKL_SEQUENTIAL)
-            message(STATUS "Disabling DLIB_USE_MKL_SEQUENTIAL. It cannot be used simultaneously with DLIB_USE_MKL_WITH_TBB.")
-         endif()
-
-         if (DLIB_USE_BLAS)
-            if (blas_found)
-               set (dlib_needed_libraries ${dlib_needed_libraries} ${blas_libraries})
-            else()
-               set(DLIB_USE_BLAS OFF CACHE STRING ${DLIB_USE_BLAS_STR} FORCE )
-               toggle_preprocessor_switch(DLIB_USE_BLAS)
-            endif()
-         endif()
-
-         if (DLIB_USE_LAPACK)
-            if (lapack_found)
-               set (dlib_needed_libraries ${dlib_needed_libraries} ${lapack_libraries})
-               if (lapack_with_underscore)
-                  set(LAPACK_FORCE_UNDERSCORE 1)
-                  enable_preprocessor_switch(LAPACK_FORCE_UNDERSCORE)
-               elseif (lapack_without_underscore)
-                  set(LAPACK_FORCE_NOUNDERSCORE 1)
-                  enable_preprocessor_switch(LAPACK_FORCE_NOUNDERSCORE)
-               endif ()
-            else()
-               set(DLIB_USE_LAPACK OFF CACHE STRING ${DLIB_USE_LAPACK_STR} FORCE )
-               toggle_preprocessor_switch(DLIB_USE_LAPACK)
-            endif()
-         endif()
-
-         if (DLIB_USE_MKL_FFT)
-            if (found_intel_mkl AND found_intel_mkl_headers)
-               set (dlib_needed_includes ${dlib_needed_includes} ${mkl_include_dir})
-               set (dlib_needed_libraries ${dlib_needed_libraries} ${mkl_libraries})
-            else()
-               set(DLIB_USE_MKL_FFT OFF CACHE STRING ${DLIB_USE_MKL_FFT_STR} FORCE )
-               toggle_preprocessor_switch(DLIB_USE_MKL_FFT)
-            endif()
-         endif()
-      endif()
-
-      if (DLIB_LINK_WITH_SQLITE3)
-         find_library(sqlite sqlite3)
-         # make sure sqlite3.h is in the include path
-         find_path(sqlite_path sqlite3.h)
-         if (sqlite AND sqlite_path)
-            set(dlib_needed_includes ${dlib_needed_includes} ${sqlite_path})
-            set(dlib_needed_libraries ${dlib_needed_libraries} ${sqlite} )
+      if (DLIB_USE_BLAS)
+         if (blas_found)
+            set (dlib_needed_libraries ${dlib_needed_libraries} ${blas_libraries})
          else()
-            set(DLIB_LINK_WITH_SQLITE3 OFF CACHE STRING ${DLIB_LINK_WITH_SQLITE3_STR} FORCE )
+            set(DLIB_USE_BLAS OFF CACHE STRING ${DLIB_USE_BLAS_STR} FORCE )
+            toggle_preprocessor_switch(DLIB_USE_BLAS)
          endif()
-         mark_as_advanced(sqlite sqlite_path)
       endif()
 
-
-
-      if (DLIB_USE_FFTW)
-         find_library(fftw fftw3)
-         # make sure fftw3.h is in the include path
-         find_path(fftw_path fftw3.h)
-         if (fftw AND fftw_path)
-            set(dlib_needed_includes ${dlib_needed_includes} ${fftw_path})
-            set(dlib_needed_libraries ${dlib_needed_libraries} ${fftw} )
+      if (DLIB_USE_LAPACK)
+         if (lapack_found)
+            set (dlib_needed_libraries ${dlib_needed_libraries} ${lapack_libraries})
+            if (lapack_with_underscore)
+               set(LAPACK_FORCE_UNDERSCORE 1)
+               enable_preprocessor_switch(LAPACK_FORCE_UNDERSCORE)
+            elseif (lapack_without_underscore)
+               set(LAPACK_FORCE_NOUNDERSCORE 1)
+               enable_preprocessor_switch(LAPACK_FORCE_NOUNDERSCORE)
+            endif ()
          else()
-            set(DLIB_USE_FFTW OFF CACHE STRING ${DLIB_USE_FFTW_STR} FORCE )
-            toggle_preprocessor_switch(DLIB_USE_FFTW)
+            set(DLIB_USE_LAPACK OFF CACHE STRING ${DLIB_USE_LAPACK_STR} FORCE )
+            toggle_preprocessor_switch(DLIB_USE_LAPACK)
          endif()
-         mark_as_advanced(fftw fftw_path)
       endif()
 
+      if (DLIB_USE_MKL_FFT)
+         if (found_intel_mkl AND found_intel_mkl_headers)
+            set (dlib_needed_includes ${dlib_needed_includes} ${mkl_include_dir})
+            set (dlib_needed_libraries ${dlib_needed_libraries} ${mkl_libraries})
+         else()
+            set(DLIB_USE_MKL_FFT OFF CACHE STRING ${DLIB_USE_MKL_FFT_STR} FORCE )
+            toggle_preprocessor_switch(DLIB_USE_MKL_FFT)
+         endif()
+      endif()
+   endif()
+
+   if (DLIB_LINK_WITH_SQLITE3)
+      find_library(sqlite sqlite3)
+      # make sure sqlite3.h is in the include path
+      find_path(sqlite_path sqlite3.h)
+      if (sqlite AND sqlite_path)
+         set(dlib_needed_includes ${dlib_needed_includes} ${sqlite_path})
+         set(dlib_needed_libraries ${dlib_needed_libraries} ${sqlite} )
+      else()
+         set(DLIB_LINK_WITH_SQLITE3 OFF CACHE STRING ${DLIB_LINK_WITH_SQLITE3_STR} FORCE )
+      endif()
+      mark_as_advanced(sqlite sqlite_path)
+   endif()
 
 
-      # Tell CMake to build dlib via add_library()/cuda_add_library()
-      add_library(dlib ${source_files} )
 
-   endif ()  ##### end of if NOT DLIB_ISO_CPP_ONLY ##########################################################
+   if (DLIB_USE_FFTW)
+      find_library(fftw fftw3)
+      # make sure fftw3.h is in the include path
+      find_path(fftw_path fftw3.h)
+      if (fftw AND fftw_path)
+         set(dlib_needed_includes ${dlib_needed_includes} ${fftw_path})
+         set(dlib_needed_libraries ${dlib_needed_libraries} ${fftw} )
+      else()
+         set(DLIB_USE_FFTW OFF CACHE STRING ${DLIB_USE_FFTW_STR} FORCE )
+         toggle_preprocessor_switch(DLIB_USE_FFTW)
+      endif()
+      mark_as_advanced(fftw fftw_path)
+   endif()
 
+   # Tell CMake to build dlib via add_library()/cuda_add_library()
+   add_library(dlib ${source_files} )
 
    target_include_directories(dlib
       INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
