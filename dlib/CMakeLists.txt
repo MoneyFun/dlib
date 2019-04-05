@@ -52,59 +52,41 @@ if(has_parent)
    endif()
 endif()
 
-if (COMMAND pybind11_add_module AND MSVC)
-   # True when building a python extension module using Visual Studio.  We care
-   # about this because a huge number of windows users have broken systems, and
-   # in particular, they have broken or incompatibly installed copies of things
-   # like libjpeg or libpng.  So if we detect we are in this mode we will never
-   # ever link to those libraries.  Instead, we link to the copy included with
-   # dlib.
-   set (BUILDING_PYTHON_IN_MSVC true)
-else()
-   set (BUILDING_PYTHON_IN_MSVC false)
+set (BUILDING_PYTHON_IN_MSVC false)
+
+# Check if we are being built as part of a pybind11 module.
+if (COMMAND pybind11_add_module)
+   set(CMAKE_POSITION_INDEPENDENT_CODE True)
+   if (CMAKE_COMPILER_IS_GNUCXX)
+      # Just setting CMAKE_POSITION_INDEPENDENT_CODE should be enough to set
+      # -fPIC for GCC but sometimes it still doesn't get set, so make sure it
+      # does.
+      add_definitions("-fPIC")
+   endif()
+   # Make DLIB_ASSERT statements not abort the python interpreter, but just return an error.
+   list(APPEND active_preprocessor_switches "-DDLIB_NO_ABORT_ON_2ND_FATAL_ERROR")
 endif()
 
-if (DLIB_IN_PROJECT_BUILD)
-
-   # Check if we are being built as part of a pybind11 module.
-   if (COMMAND pybind11_add_module)
-      set(CMAKE_POSITION_INDEPENDENT_CODE True)
-      if (CMAKE_COMPILER_IS_GNUCXX)
-         # Just setting CMAKE_POSITION_INDEPENDENT_CODE should be enough to set
-         # -fPIC for GCC but sometimes it still doesn't get set, so make sure it
-         # does.
-         add_definitions("-fPIC")
-      endif()
-      # Make DLIB_ASSERT statements not abort the python interpreter, but just return an error.
-      list(APPEND active_preprocessor_switches "-DDLIB_NO_ABORT_ON_2ND_FATAL_ERROR")
+# DLIB_IN_PROJECT_BUILD==true means you are using dlib by invoking
+# add_subdirectory(dlib) in the parent project. In this case, we always want
+# to build dlib as a static library so the parent project doesn't need to
+# deal with some random dlib shared library file.  It is much better to
+# statically compile dlib into the parent project.  So the following bit of
+# CMake ensures that happens.  However, we have to take care to compile dlib
+# with position independent code if appropriate (i.e. if the parent project
+# is a shared library).
+if (BUILD_SHARED_LIBS)
+   if (CMAKE_COMPILER_IS_GNUCXX)
+      # Just setting CMAKE_POSITION_INDEPENDENT_CODE should be enough to set
+      # -fPIC for GCC but sometimes it still doesn't get set, so make sure it
+      # does.
+      add_definitions("-fPIC")
    endif()
-
-   # DLIB_IN_PROJECT_BUILD==true means you are using dlib by invoking
-   # add_subdirectory(dlib) in the parent project. In this case, we always want
-   # to build dlib as a static library so the parent project doesn't need to
-   # deal with some random dlib shared library file.  It is much better to
-   # statically compile dlib into the parent project.  So the following bit of
-   # CMake ensures that happens.  However, we have to take care to compile dlib
-   # with position independent code if appropriate (i.e. if the parent project
-   # is a shared library).
-   if (BUILD_SHARED_LIBS)
-      if (CMAKE_COMPILER_IS_GNUCXX)
-         # Just setting CMAKE_POSITION_INDEPENDENT_CODE should be enough to set
-         # -fPIC for GCC but sometimes it still doesn't get set, so make sure it
-         # does.
-         add_definitions("-fPIC")
-      endif()
-      set(CMAKE_POSITION_INDEPENDENT_CODE true)
-   endif()
-
-   # Tell cmake to build dlib as a static library
-   set(BUILD_SHARED_LIBS false)
-
-elseif(BUILD_SHARED_LIBS)
-   if (MSVC)
-      message(FATAL_ERROR "Building dlib as a standalone dll is not supported when using Visual Studio.  You are highly encouraged to use static linking instead.  See https://github.com/davisking/dlib/issues/1483 for a discussion.")
-   endif()
+   set(CMAKE_POSITION_INDEPENDENT_CODE true)
 endif()
+
+# Tell cmake to build dlib as a static library
+set(BUILD_SHARED_LIBS false)
 
 
 if (CMAKE_VERSION VERSION_LESS "3.9.0")
@@ -158,8 +140,6 @@ if (NOT TARGET dlib)
       "Disable this if you don't want to link against libpng" )
    set (DLIB_GIF_SUPPORT_STR
       "Disable this if you don't want to link against libgif" )
-   set (DLIB_LINK_WITH_SQLITE3_STR
-      "Disable this if you don't want to link against sqlite3" )
    set (DLIB_USE_MKL_FFT_STR
       "Disable this is you don't want to use the MKL DFTI FFT implementation" )
    set (DLIB_ENABLE_ASSERTS_STR
@@ -174,36 +154,24 @@ if (NOT TARGET dlib)
    option(DLIB_USE_MKL_SEQUENTIAL ${DLIB_USE_MKL_SEQUENTIAL_STR} OFF)
    option(DLIB_USE_MKL_WITH_TBB ${DLIB_USE_MKL_WITH_TBB_STR} OFF)
 
-   if(DLIB_ENABLE_ASSERTS)
-      # Set these variables so they are set in the config.h.in file when dlib
-      # is installed.
-      set (DLIB_DISABLE_ASSERTS false)
-      set (ENABLE_ASSERTS true)
-      enable_preprocessor_switch(ENABLE_ASSERTS)
-      disable_preprocessor_switch(DLIB_DISABLE_ASSERTS)
-   else()
-      # Set these variables so they are set in the config.h.in file when dlib
-      # is installed.
-      set (DLIB_DISABLE_ASSERTS true)
-      set (ENABLE_ASSERTS false)
-      disable_preprocessor_switch(ENABLE_ASSERTS)
-      # Never force the asserts off when doing an in project build.  The only
-      # time this matters is when using visual studio.  The visual studio IDE
-      # has a drop down that lets the user select either release or debug
-      # builds.  The DLIB_ASSERT macro is setup to enable/disable automatically
-      # based on this drop down (via preprocessor magic).  However, if
-      # DLIB_DISABLE_ASSERTS is defined it permanently disables asserts no
-      # matter what, which would defeat the visual studio drop down.  So here
-      # we make a point to not do that kind of severe disabling when in a
-      # project build.  It should also be pointed out that DLIB_DISABLE_ASSERTS
-      # is only needed when building and installing dlib as a separately
-      # installed library.  It doesn't matter when doing an in project build.
-      if (NOT DLIB_IN_PROJECT_BUILD)
-         enable_preprocessor_switch(DLIB_DISABLE_ASSERTS)
-      endif()
-   endif()
 
-   option(DLIB_LINK_WITH_SQLITE3 ${DLIB_LINK_WITH_SQLITE3_STR} ON)
+   # Set these variables so they are set in the config.h.in file when dlib
+   # is installed.
+   set (DLIB_DISABLE_ASSERTS true)
+   set (ENABLE_ASSERTS false)
+   disable_preprocessor_switch(ENABLE_ASSERTS)
+   # Never force the asserts off when doing an in project build.  The only
+   # time this matters is when using visual studio.  The visual studio IDE
+   # has a drop down that lets the user select either release or debug
+   # builds.  The DLIB_ASSERT macro is setup to enable/disable automatically
+   # based on this drop down (via preprocessor magic).  However, if
+   # DLIB_DISABLE_ASSERTS is defined it permanently disables asserts no
+   # matter what, which would defeat the visual studio drop down.  So here
+   # we make a point to not do that kind of severe disabling when in a
+   # project build.  It should also be pointed out that DLIB_DISABLE_ASSERTS
+   # is only needed when building and installing dlib as a separately
+   # installed library.  It doesn't matter when doing an in project build.
+
    option(DLIB_USE_LAPACK ${DLIB_USE_LAPACK_STR} OFF)
    option(DLIB_PNG_SUPPORT ${DLIB_PNG_SUPPORT_STR} ON)
    option(DLIB_GIF_SUPPORT ${DLIB_GIF_SUPPORT_STR} ON)
@@ -289,19 +257,6 @@ if (NOT TARGET dlib)
       endif()
    endif()
 
-   if (DLIB_LINK_WITH_SQLITE3)
-      find_library(sqlite sqlite3)
-      # make sure sqlite3.h is in the include path
-      find_path(sqlite_path sqlite3.h)
-      if (sqlite AND sqlite_path)
-         set(dlib_needed_includes ${dlib_needed_includes} ${sqlite_path})
-         set(dlib_needed_libraries ${dlib_needed_libraries} ${sqlite} )
-      else()
-         set(DLIB_LINK_WITH_SQLITE3 OFF CACHE STRING ${DLIB_LINK_WITH_SQLITE3_STR} FORCE )
-      endif()
-      mark_as_advanced(sqlite sqlite_path)
-   endif()
-
 
    # Tell CMake to build dlib via add_library()/cuda_add_library()
    add_library(dlib ${source_files} )
@@ -312,25 +267,7 @@ if (NOT TARGET dlib)
       PUBLIC ${dlib_needed_includes}
       )
    target_link_libraries(dlib PUBLIC ${dlib_needed_libraries})
-   if (DLIB_IN_PROJECT_BUILD)
-      target_compile_options(dlib PUBLIC ${active_preprocessor_switches})
-   else()
-      # These are private in this case because they will be controlled by the
-      # contents of dlib/config.h once it's installed. But for in project
-      # builds, there is no real config.h so they are public in the above case.
-      target_compile_options(dlib PRIVATE ${active_preprocessor_switches})
-      # Do this so that dlib/config.h won't set DLIB_NOT_CONFIGURED. This will then allow
-      # the code in dlib/threads_kernel_shared.cpp to emit a linker error for users who
-      # don't use the configured config.h file generated by cmake.
-      target_compile_options(dlib PRIVATE -DDLIB__CMAKE_GENERATED_A_CONFIG_H_FILE)
-
-      # Do this so that dlib/config.h can record the version of dlib it's configured with
-      # and ultimately issue a linker error to people who try to use a binary dlib that is
-      # the wrong version.
-      set(DLIB_CHECK_FOR_VERSION_MISMATCH
-         DLIB_VERSION_MISMATCH_CHECK__EXPECTED_VERSION_${CPACK_PACKAGE_VERSION_MAJOR}_${CPACK_PACKAGE_VERSION_MINOR}_${CPACK_PACKAGE_VERSION_PATCH})
-      target_compile_options(dlib PRIVATE "-DDLIB_CHECK_FOR_VERSION_MISMATCH=${DLIB_CHECK_FOR_VERSION_MISMATCH}")
-   endif()
+   target_compile_options(dlib PUBLIC ${active_preprocessor_switches})
 
 
    # Allow the unit tests to ask us to compile the all/source.cpp file just to make sure it compiles.
@@ -342,97 +279,9 @@ if (NOT TARGET dlib)
    endif()
 
    enable_cpp11_for_target(dlib)
-   if((MSVC AND CMAKE_VERSION VERSION_LESS 3.11) OR CMAKE_VERSION VERSION_LESS 3.3)
-      target_compile_options(dlib PUBLIC ${active_compile_opts})
-      target_compile_options(dlib PRIVATE ${active_compile_opts_private})
-   else()
-      target_compile_options(dlib PUBLIC $<$<COMPILE_LANGUAGE:CXX>:${active_compile_opts}>)
-      target_compile_options(dlib PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${active_compile_opts_private}>)
-   endif()
+   target_compile_options(dlib PUBLIC $<$<COMPILE_LANGUAGE:CXX>:${active_compile_opts}>)
+   target_compile_options(dlib PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${active_compile_opts_private}>)
 
-   # Install the library
-   if (NOT DLIB_IN_PROJECT_BUILD)
-      set_target_properties(dlib PROPERTIES
-         VERSION ${VERSION})
-      install(TARGETS dlib
-         EXPORT dlib
-         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} # Windows considers .dll to be runtime artifacts
-         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-      install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dlib
-         FILES_MATCHING
-            PATTERN "*.h"
-            PATTERN "*.cmake"
-            PATTERN "*_tutorial.txt"
-            PATTERN "cassert"
-            PATTERN "cstring"
-            PATTERN "fstream"
-            PATTERN "iomanip"
-            PATTERN "iosfwd"
-            PATTERN "iostream"
-            PATTERN "istream"
-            PATTERN "locale"
-            PATTERN "ostream"
-            PATTERN "sstream"
-            REGEX "${CMAKE_CURRENT_BINARY_DIR}" EXCLUDE)
-
-
-      configure_file(${PROJECT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-      # overwrite config.h with the configured one
-      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dlib)
-
-      configure_file(${PROJECT_SOURCE_DIR}/revision.h.in ${CMAKE_CURRENT_BINARY_DIR}/revision.h)
-      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/revision.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dlib)
-
-      ## Config.cmake generation and installation
-
-      set(ConfigPackageLocation "${CMAKE_INSTALL_LIBDIR}/cmake/dlib")
-      install(EXPORT dlib
-         NAMESPACE dlib::
-         DESTINATION ${ConfigPackageLocation})
-
-      configure_file(cmake_utils/dlibConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/config/dlibConfig.cmake" @ONLY)
-
-      include(CMakePackageConfigHelpers)
-      write_basic_package_version_file(
-         "${CMAKE_CURRENT_BINARY_DIR}/config/dlibConfigVersion.cmake"
-         VERSION ${VERSION}
-         COMPATIBILITY AnyNewerVersion
-         )
-
-      install(FILES
-         "${CMAKE_CURRENT_BINARY_DIR}/config/dlibConfig.cmake"
-         "${CMAKE_CURRENT_BINARY_DIR}/config/dlibConfigVersion.cmake"
-         DESTINATION ${ConfigPackageLocation})
-
-      ## dlib-1.pc generation and installation
-
-      configure_file("cmake_utils/dlib.pc.in" "dlib-1.pc" @ONLY)
-      install(FILES "${CMAKE_CURRENT_BINARY_DIR}/dlib-1.pc"
-         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-
-      # Add a cpack "package" target. This will create an archive containing
-      # the built library file, the header files, and cmake and pkgconfig
-      # configuration files.
-      include(CPack)
-
-   endif()
-
-endif()
-
-if (MSVC)
-   # Give the output library files names that are unique functions of the
-   # visual studio mode that compiled them.  We do this so that people who
-   # compile dlib and then copy the .lib files around (which they shouldn't be
-   # doing in the first place!) will hopefully be slightly less confused by
-   # what happens since, at the very least, the filenames will indicate what
-   # visual studio runtime they go with.
-   math(EXPR numbits ${CMAKE_SIZEOF_VOID_P}*8)
-   set_target_properties(dlib PROPERTIES DEBUG_POSTFIX "${VERSION}_debug_${numbits}bit_msvc${MSVC_VERSION}")
-   set_target_properties(dlib PROPERTIES RELEASE_POSTFIX "${VERSION}_release_${numbits}bit_msvc${MSVC_VERSION}")
-   set_target_properties(dlib PROPERTIES MINSIZEREL_POSTFIX "${VERSION}_minsizerel_${numbits}bit_msvc${MSVC_VERSION}")
-   set_target_properties(dlib PROPERTIES RELWITHDEBINFO_POSTFIX "${VERSION}_relwithdebinfo_${numbits}bit_msvc${MSVC_VERSION}")
 endif()
 
 # Check if we are being built as part of a pybind11 module.
