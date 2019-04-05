@@ -173,7 +173,6 @@ if (NOT TARGET dlib)
       entropy_decoder/entropy_decoder_kernel_2.cpp
       entropy_encoder/entropy_encoder_kernel_1.cpp
       entropy_encoder/entropy_encoder_kernel_2.cpp
-      md5/md5_kernel_1.cpp
       tokenizer/tokenizer_kernel_1.cpp
       unicode/unicode.cpp
       )
