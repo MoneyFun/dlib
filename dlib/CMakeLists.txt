@@ -155,8 +155,6 @@ if (NOT TARGET dlib)
 
    set (DLIB_ISO_CPP_ONLY_STR
       "Enable this if you don't want to compile any non-ISO C++ code (i.e. you don't use any of the API Wrappers)" )
-   set (DLIB_NO_GUI_SUPPORT_STR
-      "Enable this if you don't want to compile any of the dlib GUI code" )
    set (DLIB_ENABLE_STACK_TRACE_STR
       "Enable this if you want to turn on the DLIB_STACK_TRACE macros" )
    set (DLIB_USE_BLAS_STR
@@ -185,8 +183,6 @@ if (NOT TARGET dlib)
    option(DLIB_ENABLE_ASSERTS ${DLIB_ENABLE_ASSERTS_STR} OFF)
    option(DLIB_ISO_CPP_ONLY ${DLIB_ISO_CPP_ONLY_STR} OFF)
    toggle_preprocessor_switch(DLIB_ISO_CPP_ONLY)
-   option(DLIB_NO_GUI_SUPPORT ${DLIB_NO_GUI_SUPPORT_STR} OFF)
-   toggle_preprocessor_switch(DLIB_NO_GUI_SUPPORT)
    option(DLIB_ENABLE_STACK_TRACE ${DLIB_ENABLE_STACK_TRACE_STR} OFF)
    toggle_preprocessor_switch(DLIB_ENABLE_STACK_TRACE)
    option(DLIB_USE_MKL_SEQUENTIAL ${DLIB_USE_MKL_SEQUENTIAL_STR} OFF)
@@ -302,30 +298,7 @@ if (NOT TARGET dlib)
          set (dlib_needed_libraries ${dlib_needed_libraries} ${socketlib})
       endif ()
 
-      if (NOT DLIB_NO_GUI_SUPPORT)
-         include(FindX11)
-         if (X11_FOUND)
-            include_directories(${X11_INCLUDE_DIR})
-            set (dlib_needed_libraries ${dlib_needed_libraries} ${X11_LIBRARIES})
-         else()
-            message(" *****************************************************************************")
-            message(" *** DLIB GUI SUPPORT DISABLED BECAUSE X11 DEVELOPMENT LIBRARIES NOT FOUND ***")
-            message(" *** Make sure libx11-dev is installed if you want GUI support.            ***")
-            message(" *** On Ubuntu run: sudo apt-get install libx11-dev                        ***")
-            message(" *****************************************************************************")
-            set(DLIB_NO_GUI_SUPPORT OFF CACHE STRING ${DLIB_NO_GUI_SUPPORT_STR} FORCE )
-            enable_preprocessor_switch(DLIB_NO_GUI_SUPPORT)
-         endif()
-      endif()
-
       mark_as_advanced(nsllib pthreadlib socketlib)
-
-      if (NOT DLIB_NO_GUI_SUPPORT)
-         set(source_files ${source_files}
-            gui_core/gui_core_kernel_1.cpp
-            gui_core/gui_core_kernel_2.cpp
-            )
-      endif()
 
       INCLUDE (CheckFunctionExists)
 
