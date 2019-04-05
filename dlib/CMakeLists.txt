@@ -136,15 +136,6 @@ macro (toggle_preprocessor_switch option_name)
 endmacro()
 
 
-
-# Suppress superfluous randlib warnings about libdlib.a having no symbols on MacOSX.
-if (APPLE)
-   set(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
-   set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
-   set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
-   set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
-endif()
-
 # Don't try to call add_library(dlib) and setup dlib's stuff if it has already
 # been done by some other part of the current cmake project.  We do this
 # because it avoids getting warnings/errors about cmake policy CMP0002.  This
@@ -157,12 +148,8 @@ if (NOT TARGET dlib)
       "Enable this if you don't want to compile any non-ISO C++ code (i.e. you don't use any of the API Wrappers)" )
    set (DLIB_ENABLE_STACK_TRACE_STR
       "Enable this if you want to turn on the DLIB_STACK_TRACE macros" )
-   set (DLIB_USE_BLAS_STR
-      "Disable this if you don't want to use a BLAS library" )
    set (DLIB_USE_LAPACK_STR
       "Disable this if you don't want to use a LAPACK library" )
-   set (DLIB_USE_CUDA_STR
-      "Disable this if you don't want to use NVIDIA CUDA" )
    set (DLIB_USE_MKL_SEQUENTIAL_STR
       "Enable this if you have MKL installed and want to use the sequential version instead of the multi-core version." )
    set (DLIB_USE_MKL_WITH_TBB_STR
@@ -173,7 +160,6 @@ if (NOT TARGET dlib)
       "Disable this if you don't want to link against libgif" )
    set (DLIB_LINK_WITH_SQLITE3_STR
       "Disable this if you don't want to link against sqlite3" )
-   #set (DLIB_USE_FFTW_STR "Disable this if you don't want to link against fftw" )
    set (DLIB_USE_MKL_FFT_STR
       "Disable this is you don't want to use the MKL DFTI FFT implementation" )
    set (DLIB_ENABLE_ASSERTS_STR
@@ -218,19 +204,13 @@ if (NOT TARGET dlib)
    endif()
 
    option(DLIB_LINK_WITH_SQLITE3 ${DLIB_LINK_WITH_SQLITE3_STR} ON)
-   option(DLIB_USE_BLAS ${DLIB_USE_BLAS_STR} OFF)
    option(DLIB_USE_LAPACK ${DLIB_USE_LAPACK_STR} OFF)
-   option(DLIB_USE_CUDA ${DLIB_USE_CUDA_STR} OFF)
    option(DLIB_PNG_SUPPORT ${DLIB_PNG_SUPPORT_STR} ON)
    option(DLIB_GIF_SUPPORT ${DLIB_GIF_SUPPORT_STR} ON)
-   #option(DLIB_USE_FFTW ${DLIB_USE_FFTW_STR} ON)
    option(DLIB_USE_MKL_FFT ${DLIB_USE_MKL_FFT_STR} ON)
-   toggle_preprocessor_switch(DLIB_USE_BLAS)
    toggle_preprocessor_switch(DLIB_USE_LAPACK)
-   toggle_preprocessor_switch(DLIB_USE_CUDA)
    toggle_preprocessor_switch(DLIB_PNG_SUPPORT)
    toggle_preprocessor_switch(DLIB_GIF_SUPPORT)
-   #toggle_preprocessor_switch(DLIB_USE_FFTW)
    toggle_preprocessor_switch(DLIB_USE_MKL_FFT)
 
 
@@ -275,20 +255,11 @@ if (NOT TARGET dlib)
 
    INCLUDE (CheckFunctionExists)
 
-   if (DLIB_USE_BLAS OR DLIB_USE_LAPACK OR DLIB_USE_MKL_FFT)
+   if (DLIB_USE_LAPACK OR DLIB_USE_MKL_FFT)
       if (DLIB_USE_MKL_WITH_TBB AND DLIB_USE_MKL_SEQUENTIAL)
          set(DLIB_USE_MKL_SEQUENTIAL OFF CACHE STRING ${DLIB_USE_MKL_SEQUENTIAL_STR} FORCE )
          toggle_preprocessor_switch(DLIB_USE_MKL_SEQUENTIAL)
          message(STATUS "Disabling DLIB_USE_MKL_SEQUENTIAL. It cannot be used simultaneously with DLIB_USE_MKL_WITH_TBB.")
-      endif()
-
-      if (DLIB_USE_BLAS)
-         if (blas_found)
-            set (dlib_needed_libraries ${dlib_needed_libraries} ${blas_libraries})
-         else()
-            set(DLIB_USE_BLAS OFF CACHE STRING ${DLIB_USE_BLAS_STR} FORCE )
-            toggle_preprocessor_switch(DLIB_USE_BLAS)
-         endif()
       endif()
 
       if (DLIB_USE_LAPACK)
@@ -331,21 +302,6 @@ if (NOT TARGET dlib)
       mark_as_advanced(sqlite sqlite_path)
    endif()
 
-
-
-   if (DLIB_USE_FFTW)
-      find_library(fftw fftw3)
-      # make sure fftw3.h is in the include path
-      find_path(fftw_path fftw3.h)
-      if (fftw AND fftw_path)
-         set(dlib_needed_includes ${dlib_needed_includes} ${fftw_path})
-         set(dlib_needed_libraries ${dlib_needed_libraries} ${fftw} )
-      else()
-         set(DLIB_USE_FFTW OFF CACHE STRING ${DLIB_USE_FFTW_STR} FORCE )
-         toggle_preprocessor_switch(DLIB_USE_FFTW)
-      endif()
-      mark_as_advanced(fftw fftw_path)
-   endif()
 
    # Tell CMake to build dlib via add_library()/cuda_add_library()
    add_library(dlib ${source_files} )
