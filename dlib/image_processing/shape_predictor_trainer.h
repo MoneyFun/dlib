@@ -7,7 +7,6 @@
 #include "shape_predictor.h"
 #include "../console_progress_indicator.h"
 #include "../threads.h"
-#include "../data_io/image_dataset_metadata.h"
 #include "box_overlap_testing.h"
 
 namespace dlib
@@ -18,7 +17,7 @@ namespace dlib
     class shape_predictor_trainer
     {
         /*!
-            This thing really only works with unsigned char or rgb_pixel images (since we assume the threshold 
+            This thing really only works with unsigned char or rgb_pixel images (since we assume the threshold
             should be in the range [-128,128]).
         !*/
     public:
@@ -26,7 +25,7 @@ namespace dlib
         enum padding_mode_t
         {
             bounding_box_relative,
-            landmark_relative 
+            landmark_relative
         };
 
         shape_predictor_trainer (
@@ -54,7 +53,7 @@ namespace dlib
             unsigned long depth
         )
         {
-            DLIB_CASSERT(depth > 0, 
+            DLIB_CASSERT(depth > 0,
                 "\t void shape_predictor_trainer::set_cascade_depth()"
                 << "\n\t Invalid inputs were given to this function. "
                 << "\n\t depth:  " << depth
@@ -70,7 +69,7 @@ namespace dlib
             unsigned long depth
         )
         {
-            DLIB_CASSERT(depth > 0, 
+            DLIB_CASSERT(depth > 0,
                 "\t void shape_predictor_trainer::set_tree_depth()"
                 << "\n\t Invalid inputs were given to this function. "
                 << "\n\t depth:  " << depth
@@ -95,7 +94,7 @@ namespace dlib
         }
 
         double get_nu (
-        ) const { return _nu; } 
+        ) const { return _nu; }
         void set_nu (
             double nu
         )
@@ -103,7 +102,7 @@ namespace dlib
             DLIB_CASSERT(0 < nu && nu <= 1,
                 "\t void shape_predictor_trainer::set_nu()"
                 << "\n\t Invalid inputs were given to this function. "
-                << "\n\t nu:  " << nu 
+                << "\n\t nu:  " << nu
             );
 
             _nu = nu;
@@ -122,10 +121,10 @@ namespace dlib
             unsigned long amount
         )
         {
-            DLIB_CASSERT(amount > 0, 
+            DLIB_CASSERT(amount > 0,
                 "\t void shape_predictor_trainer::set_oversampling_amount()"
                 << "\n\t Invalid inputs were given to this function. "
-                << "\n\t amount: " << amount 
+                << "\n\t amount: " << amount
             );
 
             _oversampling_amount = amount;
@@ -138,10 +137,10 @@ namespace dlib
             double amount
         )
         {
-            DLIB_CASSERT(amount >= 0, 
+            DLIB_CASSERT(amount >= 0,
                 "\t void shape_predictor_trainer::set_oversampling_translation_jitter()"
                 << "\n\t Invalid inputs were given to this function. "
-                << "\n\t amount: " << amount 
+                << "\n\t amount: " << amount
             );
 
             _oversampling_translation_jitter = amount;
@@ -151,12 +150,12 @@ namespace dlib
         ) const { return _feature_pool_size; }
         void set_feature_pool_size (
             unsigned long size
-        ) 
+        )
         {
-            DLIB_CASSERT(size > 1, 
+            DLIB_CASSERT(size > 1,
                 "\t void shape_predictor_trainer::set_feature_pool_size()"
                 << "\n\t Invalid inputs were given to this function. "
-                << "\n\t size: " << size 
+                << "\n\t size: " << size
             );
 
             _feature_pool_size = size;
@@ -171,7 +170,7 @@ namespace dlib
             DLIB_CASSERT(lambda > 0,
                 "\t void shape_predictor_trainer::set_lambda()"
                 << "\n\t Invalid inputs were given to this function. "
-                << "\n\t lambda: " << lambda 
+                << "\n\t lambda: " << lambda
             );
 
             _lambda = lambda;
@@ -183,10 +182,10 @@ namespace dlib
             unsigned long num
         )
         {
-            DLIB_CASSERT(num > 0, 
+            DLIB_CASSERT(num > 0,
                 "\t void shape_predictor_trainer::set_num_test_splits()"
                 << "\n\t Invalid inputs were given to this function. "
-                << "\n\t num: " << num 
+                << "\n\t num: " << num
             );
 
             _num_test_splits = num;
@@ -205,13 +204,13 @@ namespace dlib
         double get_feature_pool_region_padding (
         ) const { return _feature_pool_region_padding; }
         void set_feature_pool_region_padding (
-            double padding 
+            double padding
         )
         {
             DLIB_CASSERT(padding > -0.5,
                 "\t void shape_predictor_trainer::set_feature_pool_region_padding()"
                 << "\n\t Invalid inputs were given to this function. "
-                << "\n\t padding: " << padding 
+                << "\n\t padding: " << padding
             );
 
             _feature_pool_region_padding = padding;
@@ -248,11 +247,11 @@ namespace dlib
             DLIB_CASSERT(images.size() == objects.size() && images.size() > 0,
                 "\t shape_predictor shape_predictor_trainer::train()"
                 << "\n\t Invalid inputs were given to this function. "
-                << "\n\t images.size():  " << images.size() 
-                << "\n\t objects.size(): " << objects.size() 
+                << "\n\t images.size():  " << images.size()
+                << "\n\t objects.size(): " << objects.size()
             );
             // make sure the objects agree on the number of parts and that there is at
-            // least one full_object_detection. 
+            // least one full_object_detection.
             unsigned long num_parts = 0;
             std::vector<int> part_present;
             for (unsigned long i = 0; i < objects.size(); ++i)
@@ -274,7 +273,7 @@ namespace dlib
                             "\t shape_predictor shape_predictor_trainer::train()"
                             << "\n\t All the objects must agree on the number of parts. "
                             << "\n\t objects["<<i<<"]["<<j<<"].num_parts(): " << objects[i][j].num_parts()
-                            << "\n\t num_parts:  " << num_parts 
+                            << "\n\t num_parts:  " << num_parts
                         );
                     }
                     for (unsigned long p = 0; p < objects[i][j].num_parts(); ++p)
@@ -319,7 +318,7 @@ namespace dlib
             {
                 // Each cascade uses a different set of pixels for its features.  We compute
                 // their representations relative to the initial shape first.
-                std::vector<unsigned long> anchor_idx; 
+                std::vector<unsigned long> anchor_idx;
                 std::vector<dlib::vector<float,2> > deltas;
                 create_shape_relative_encoding(initial_shape, pixel_coordinates[cascade], anchor_idx, deltas);
 
@@ -539,7 +538,7 @@ namespace dlib
             const std::vector<dlib::vector<float,2> >& pixel_coordinates
         ) const
         {
-            const double lambda = get_lambda(); 
+            const double lambda = get_lambda();
             impl::split_feature feat;
             const size_t max_iters = get_feature_pool_size()*get_feature_pool_size();
             for (size_t i = 0; i < max_iters; ++i)
@@ -568,12 +567,12 @@ namespace dlib
             const std::vector<dlib::vector<float,2> >& pixel_coordinates,
             const matrix<float,0,1>& sum,
             matrix<float,0,1>& left_sum,
-            matrix<float,0,1>& right_sum 
+            matrix<float,0,1>& right_sum
         ) const
         {
             // generate a bunch of random splits and test them and return the best one.
 
-            const unsigned long num_test_splits = get_num_test_splits();  
+            const unsigned long num_test_splits = get_num_test_splits();
 
             // sample the random features we test in this function
             std::vector<impl::split_feature> feats;
@@ -763,7 +762,7 @@ namespace dlib
         ) const
         /*!
             ensures
-                - #pixel_coordinates.size() == get_feature_pool_size() 
+                - #pixel_coordinates.size() == get_feature_pool_size()
                 - for all valid i:
                     - pixel_coordinates[i] == a point in the box defined by the min/max x/y arguments.
         !*/
@@ -827,56 +826,6 @@ namespace dlib
         padding_mode_t _padding_mode;
         double _oversampling_translation_jitter;
     };
-
-// ----------------------------------------------------------------------------------------
-
-    template <
-        typename some_type_of_rectangle
-        >
-    image_dataset_metadata::dataset make_bounding_box_regression_training_data (
-        const image_dataset_metadata::dataset& truth,
-        const std::vector<std::vector<some_type_of_rectangle>>& detections
-    )
-    {
-        DLIB_CASSERT(truth.images.size() == detections.size(), 
-            "truth.images.size(): "<< truth.images.size() <<
-            "\tdetections.size(): "<< detections.size()
-        );
-        image_dataset_metadata::dataset result = truth;
-
-        for (size_t i = 0; i < truth.images.size(); ++i)
-        {
-            result.images[i].boxes.clear();
-            for (auto truth_box : truth.images[i].boxes)
-            {
-                if (truth_box.ignore)
-                    continue;
-
-                // Find the detection that best matches the current truth_box.
-                auto det = max_scoring_element(detections[i], [&truth_box](const rectangle& r) { return box_intersection_over_union(r, truth_box.rect); });
-                if (det.second > 0.5)
-                {
-                    // Remove any existing parts and replace them with the truth_box corners.
-                    truth_box.parts.clear();
-                    auto b = truth_box.rect;
-                    truth_box.parts["left"]     = (b.tl_corner()+b.bl_corner())/2;
-                    truth_box.parts["right"]    = (b.tr_corner()+b.br_corner())/2;
-                    truth_box.parts["top"]      = (b.tl_corner()+b.tr_corner())/2;
-                    truth_box.parts["bottom"]   = (b.bl_corner()+b.br_corner())/2;
-                    truth_box.parts["middle"]   = center(b);
-
-                    // Now replace the bounding truth_box with the detector's bounding truth_box.
-                    truth_box.rect = det.first;
-
-                    result.images[i].boxes.push_back(truth_box);
-                }
-            }
-        }
-        return result;
-    }
-
-// ----------------------------------------------------------------------------------------
-
 }
 
 #endif // DLIB_SHAPE_PREDICToR_TRAINER_H_
