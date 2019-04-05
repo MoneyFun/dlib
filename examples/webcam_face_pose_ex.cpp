@@ -29,10 +29,11 @@
 
 #include <dlib/opencv.h>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_processing/render_face_detections.h>
 #include <dlib/image_processing.h>
-#include <dlib/gui_widgets.h>
+// #include <dlib/gui_widgets.h>
 #include "model_utils.hpp"
 
 using namespace dlib;
@@ -42,7 +43,7 @@ int main()
 {
     try
     {
-        cv::VideoCapture cap(0);
+        cv::VideoCapture cap(-1);
         if (!cap.isOpened())
         {
             cerr << "Unable to connect to camera" << endl;
@@ -54,6 +55,8 @@ int main()
         shape_predictor pose_model;
         med::load_shape_predictor_model(pose_model, "shape_predictor_68_face_landmarks_small.dat");
 
+        full_object_detection detect_result;
+        point p;
         // Grab and process frames until the main window is closed by the user.
         while(1)
         {
@@ -74,9 +77,16 @@ int main()
             // Detect faces
             std::vector<rectangle> faces = detector(cimg);
             // Find the pose of each face.
-            std::vector<full_object_detection> shapes;
+            // std::vector<full_object_detection> shapes;
+
             for (unsigned long i = 0; i < faces.size(); ++i)
-                shapes.push_back(pose_model(cimg, faces[i]));
+                //pose_model(cimg, faces[i]);
+                detect_result = pose_model(cimg, faces[i]);
+                for (char j = 0; j < detect_result.num_parts(); j++) {
+                    p = detect_result.part(j);
+                    cv::circle(temp, cv::Point(p.x(), p.y()), 3, cv::Scalar(255,0,0), -1);
+                }
+            // render_face_detections(shapes);
 
             // Display it all on the screen
             cv::imshow("dlib", temp);
