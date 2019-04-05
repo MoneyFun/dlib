@@ -246,7 +246,6 @@ if (NOT TARGET dlib)
       md5/md5_kernel_1.cpp
       tokenizer/tokenizer_kernel_1.cpp
       unicode/unicode.cpp
-      filtering/kalman_filter.cpp
       test_for_odr_violations.cpp
       svm/auto.cpp
       )
