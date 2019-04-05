@@ -246,7 +246,6 @@ if (NOT TARGET dlib)
       md5/md5_kernel_1.cpp
       tokenizer/tokenizer_kernel_1.cpp
       unicode/unicode.cpp
-      global_optimization/global_function_search.cpp
       filtering/kalman_filter.cpp
       test_for_odr_violations.cpp
       svm/auto.cpp
@@ -266,13 +265,6 @@ if (NOT TARGET dlib)
          logger/logger_config_file.cpp
          misc_api/misc_api_kernel_1.cpp
          misc_api/misc_api_kernel_2.cpp
-         threads/multithreaded_object_extension.cpp
-         threads/threaded_object_extension.cpp
-         threads/threads_kernel_1.cpp
-         threads/threads_kernel_2.cpp
-         threads/threads_kernel_shared.cpp
-         threads/thread_pool_extension.cpp
-         threads/async.cpp
          timer/timer.cpp
          stack_trace.cpp
          )
