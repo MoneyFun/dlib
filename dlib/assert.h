@@ -3,7 +3,6 @@
 #ifndef DLIB_ASSERt_
 #define DLIB_ASSERt_
 
-#include "config.h"
 #include <sstream>
 #include <iosfwd>
 #include "error.h"
@@ -20,22 +19,22 @@
 //  (C) Copyright Gennaro Prota 2003.
 //  (C) Copyright Eric Friedman 2003.
 // License: Boost Software License   See LICENSE.txt for the full license.
-// 
+//
 #ifndef DLIB_BOOST_JOIN
 #define DLIB_BOOST_JOIN( X, Y ) DLIB_BOOST_DO_JOIN( X, Y )
 #define DLIB_BOOST_DO_JOIN( X, Y ) DLIB_BOOST_DO_JOIN2(X,Y)
 #define DLIB_BOOST_DO_JOIN2( X, Y ) X##Y
 #endif
 
-// figure out if the compiler has rvalue references. 
-#if defined(__clang__) 
+// figure out if the compiler has rvalue references.
+#if defined(__clang__)
 #   if __has_feature(cxx_rvalue_references)
 #       define DLIB_HAS_RVALUE_REFERENCES
 #   endif
 #   if __has_feature(cxx_generalized_initializers)
 #       define DLIB_HAS_INITIALIZER_LISTS
 #   endif
-#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)) && defined(__GXX_EXPERIMENTAL_CXX0X__) 
+#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)) && defined(__GXX_EXPERIMENTAL_CXX0X__)
 #   define DLIB_HAS_RVALUE_REFERENCES
 #   define DLIB_HAS_INITIALIZER_LISTS
 #elif defined(_MSC_VER) && _MSC_VER >= 1800
@@ -53,12 +52,12 @@
 #   undef DLIB_HAS_INITIALIZER_LISTS
 #endif
 
-// figure out if the compiler has static_assert. 
-#if defined(__clang__) 
+// figure out if the compiler has static_assert.
+#if defined(__clang__)
 #   if __has_feature(cxx_static_assert)
 #       define DLIB_HAS_STATIC_ASSERT
 #   endif
-#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)) && defined(__GXX_EXPERIMENTAL_CXX0X__) 
+#elif defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)) && defined(__GXX_EXPERIMENTAL_CXX0X__)
 #   define DLIB_HAS_STATIC_ASSERT
 #elif defined(_MSC_VER) && _MSC_VER >= 1600
 #   define DLIB_HAS_STATIC_ASSERT
@@ -89,7 +88,7 @@ namespace dlib
 #ifdef __GNUC__
 #define DLIB_NO_WARN_UNUSED __attribute__ ((unused))
 #else
-#define DLIB_NO_WARN_UNUSED 
+#define DLIB_NO_WARN_UNUSED
 #endif
 
 // Use the newer static_assert if it's available since it produces much more readable error
@@ -100,13 +99,13 @@ namespace dlib
     #define ASSERT_ARE_NOT_SAME_TYPE(type1, type2) static_assert(!::dlib::assert_types_match<type1,type2>::value, "These types should NOT be the same.")
 #else
     #define COMPILE_TIME_ASSERT(expression) \
-        DLIB_NO_WARN_UNUSED typedef char DLIB_BOOST_JOIN(DLIB_CTA, __LINE__)[::dlib::compile_time_assert<(bool)(expression)>::value] 
+        DLIB_NO_WARN_UNUSED typedef char DLIB_BOOST_JOIN(DLIB_CTA, __LINE__)[::dlib::compile_time_assert<(bool)(expression)>::value]
 
     #define ASSERT_ARE_SAME_TYPE(type1, type2) \
-        DLIB_NO_WARN_UNUSED typedef char DLIB_BOOST_JOIN(DLIB_AAST, __LINE__)[::dlib::assert_are_same_type<type1,type2>::value] 
+        DLIB_NO_WARN_UNUSED typedef char DLIB_BOOST_JOIN(DLIB_AAST, __LINE__)[::dlib::assert_are_same_type<type1,type2>::value]
 
     #define ASSERT_ARE_NOT_SAME_TYPE(type1, type2) \
-        DLIB_NO_WARN_UNUSED typedef char DLIB_BOOST_JOIN(DLIB_AANST, __LINE__)[::dlib::assert_are_not_same_type<type1,type2>::value] 
+        DLIB_NO_WARN_UNUSED typedef char DLIB_BOOST_JOIN(DLIB_AANST, __LINE__)[::dlib::assert_are_not_same_type<type1,type2>::value]
 #endif
 
 // -----------------------------
@@ -132,12 +131,12 @@ namespace dlib
 #  if !(__GNUC__ == 4 && __GNUC_MINOR__ == 4 && __GNUC_PATCHLEVEL__ == 5)
 #    define DLIB_FUNCTION_NAME __PRETTY_FUNCTION__
 #  else
-#    define DLIB_FUNCTION_NAME "unknown function" 
+#    define DLIB_FUNCTION_NAME "unknown function"
 #  endif
 #elif defined(_MSC_VER)
 #define DLIB_FUNCTION_NAME __FUNCSIG__
 #else
-#define DLIB_FUNCTION_NAME "unknown function" 
+#define DLIB_FUNCTION_NAME "unknown function"
 #endif
 
 #define DLIBM_CASSERT(_exp,_message)                                              \
@@ -151,9 +150,9 @@ namespace dlib
         dlib_o_out << "Failing expression was " << #_exp << ".\n";           \
         dlib_o_out << std::boolalpha << _message << "\n";                    \
         throw dlib::fatal_error(dlib::EBROKEN_ASSERT,dlib_o_out.str());      \
-    }}                                                                      
+    }}
 
-// This macro is not needed if you have a real C++ compiler.  It's here to work around bugs in Visual Studio's preprocessor.  
+// This macro is not needed if you have a real C++ compiler.  It's here to work around bugs in Visual Studio's preprocessor.
 #define DLIB_WORKAROUND_VISUAL_STUDIO_BUGS(x) x
 // Make it so the 2nd argument of DLIB_CASSERT is optional.  That is, you can call it like
 // DLIB_CASSERT(exp) or DLIB_CASSERT(exp,message).
@@ -164,32 +163,32 @@ namespace dlib
 #define DLIB_CASSERT(...) DLIB_WORKAROUND_VISUAL_STUDIO_BUGS(DLIBM_CASSERT_CHOOSER(__VA_ARGS__)(__VA_ARGS__))
 
 
-#ifdef ENABLE_ASSERTS 
+#ifdef ENABLE_ASSERTS
     #define DLIB_ASSERT(...) DLIB_CASSERT(__VA_ARGS__)
     #define DLIB_IF_ASSERT(exp) exp
 #else
     #define DLIB_ASSERT(...) {}
-    #define DLIB_IF_ASSERT(exp) 
+    #define DLIB_IF_ASSERT(exp)
 #endif
 
 // ----------------------------------------------------------------------------------------
 
-    /*!A DLIB_ASSERT_HAS_STANDARD_LAYOUT 
-    
+    /*!A DLIB_ASSERT_HAS_STANDARD_LAYOUT
+
         This macro is meant to cause a compiler error if a type doesn't have a simple
         memory layout (like a C struct). In particular, types with simple layouts are
         ones which can be copied via memcpy().
-        
-        
-        This was called a POD type in C++03 and in C++0x we are looking to check if 
-        it is a "standard layout type".  Once we can use C++0x we can change this macro 
-        to something that uses the std::is_standard_layout type_traits class.  
+
+
+        This was called a POD type in C++03 and in C++0x we are looking to check if
+        it is a "standard layout type".  Once we can use C++0x we can change this macro
+        to something that uses the std::is_standard_layout type_traits class.
         See: http://www2.research.att.com/~bs/C++0xFAQ.html#PODs
     !*/
     // Use the fact that in C++03 you can't put non-PODs into a union.
 #define DLIB_ASSERT_HAS_STANDARD_LAYOUT(type)   \
     union  DLIB_BOOST_JOIN(DAHSL_,__LINE__) { type TYPE_NOT_STANDARD_LAYOUT; };  \
-    DLIB_NO_WARN_UNUSED typedef char DLIB_BOOST_JOIN(DAHSL2_,__LINE__)[sizeof(DLIB_BOOST_JOIN(DAHSL_,__LINE__))]; 
+    DLIB_NO_WARN_UNUSED typedef char DLIB_BOOST_JOIN(DAHSL2_,__LINE__)[sizeof(DLIB_BOOST_JOIN(DAHSL_,__LINE__))];
 
 // ----------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------
@@ -202,7 +201,7 @@ extern "C"
     ) {}
     /*!
         ensures
-            - this function does nothing 
+            - this function does nothing
               It exists just so you can put breakpoints on it in a debugging tool.
               It is called only when an DLIB_ASSERT or DLIB_CASSERT fails and is about to
               throw an exception.
