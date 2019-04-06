@@ -50,24 +50,6 @@ set(DLIB_VERSION ${VERSION} PARENT_SCOPE)
 
 set (BUILDING_PYTHON_IN_MSVC false)
 
-# DLIB_IN_PROJECT_BUILD==true means you are using dlib by invoking
-# add_subdirectory(dlib) in the parent project. In this case, we always want
-# to build dlib as a static library so the parent project doesn't need to
-# deal with some random dlib shared library file.  It is much better to
-# statically compile dlib into the parent project.  So the following bit of
-# CMake ensures that happens.  However, we have to take care to compile dlib
-# with position independent code if appropriate (i.e. if the parent project
-# is a shared library).
-if (BUILD_SHARED_LIBS)
-   if (CMAKE_COMPILER_IS_GNUCXX)
-      # Just setting CMAKE_POSITION_INDEPENDENT_CODE should be enough to set
-      # -fPIC for GCC but sometimes it still doesn't get set, so make sure it
-      # does.
-      add_definitions("-fPIC")
-   endif()
-   set(CMAKE_POSITION_INDEPENDENT_CODE true)
-endif()
-
 # Tell cmake to build dlib as a static library
 set(BUILD_SHARED_LIBS false)
 
