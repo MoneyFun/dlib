@@ -8,7 +8,7 @@
 #ifndef DLIB_ALGs_
 #define DLIB_ALGs_
 
-// this file contains miscellaneous stuff                      
+// this file contains miscellaneous stuff
 
 // Give people who forget the -std=c++11 option a reminder
 #if (defined(__GNUC__) && ((__GNUC__ >= 4 && __GNUC_MINOR__ >= 8) || (__GNUC__ > 4))) || \
@@ -36,31 +36,31 @@
 
 // this is to disable the "'this' : used in base member initializer list"
 // warning you get from some of the GUI objects since all the objects
-// require that their parent class be passed into their constructor. 
+// require that their parent class be passed into their constructor.
 // In this case though it is totally safe so it is ok to disable this warning.
 #pragma warning(disable : 4355)
 
-// This is a warning you get sometimes when Visual Studio performs a Koenig Lookup. 
-// This is a bug in visual studio.  It is a totally legitimate thing to 
-// expect from a compiler. 
+// This is a warning you get sometimes when Visual Studio performs a Koenig Lookup.
+// This is a bug in visual studio.  It is a totally legitimate thing to
+// expect from a compiler.
 #pragma warning(disable : 4675)
 
 // This is a warning you get from visual studio 2005 about things in the standard C++
-// library being "deprecated."  I checked the C++ standard and it doesn't say jack 
+// library being "deprecated."  I checked the C++ standard and it doesn't say jack
 // about any of them (I checked the searchable PDF).   So this warning is total Bunk.
 #pragma warning(disable : 4996)
 
 // This is a warning you get from visual studio 2003:
-//    warning C4345: behavior change: an object of POD type constructed with an initializer 
+//    warning C4345: behavior change: an object of POD type constructed with an initializer
 //    of the form () will be default-initialized.
-// I love it when this compiler gives warnings about bugs in previous versions of itself. 
+// I love it when this compiler gives warnings about bugs in previous versions of itself.
 #pragma warning(disable : 4345)
 
 
 // Disable warnings about conversion from size_t to unsigned long and long.
 #pragma warning(disable : 4267)
 
-// Disable warnings about conversion from double to float  
+// Disable warnings about conversion from double to float
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4305)
 
@@ -84,10 +84,10 @@
 // Disable the following warnings for the Borland Compilers
 //
 // These warnings just say that the compiler is refusing to inline functions with
-// loops or try blocks in them.  
+// loops or try blocks in them.
 //
 #pragma option -w-8027
-#pragma option -w-8026 
+#pragma option -w-8026
 #endif
 
 #include <string>       // for the exceptions
@@ -100,7 +100,6 @@ namespace std
 #endif
 
 #include "platform.h"
-#include "windows_magic.h"
 
 
 #include <algorithm>    // for std::swap
@@ -136,7 +135,7 @@ template <>
 inline const wchar_t* _dTcast<wchar_t> ( const char* , const wchar_t* b) { return b; }
 
 
-#define _dT(charT,str) _dTcast<charT>(str,L##str) 
+#define _dT(charT,str) _dTcast<charT>(str,L##str)
 /*!
     requires
         - charT == char or wchar_t
@@ -156,7 +155,7 @@ namespace dlib
 
     /*!A default_memory_manager
 
-        This memory manager just calls new and delete directly.  
+        This memory manager just calls new and delete directly.
 
     !*/
     typedef memory_manager_stateless_kernel_1<char> default_memory_manager;
@@ -170,7 +169,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     /*!
-        Here is where I define my return codes.  It is 
+        Here is where I define my return codes.  It is
         important that they all be < 0.
     !*/
 
@@ -198,7 +197,7 @@ namespace dlib
     {
         unsigned long x;
 
-        // set the initial guess for what the root is depending on 
+        // set the initial guess for what the root is depending on
         // how big value is
         if (value < 3)
             return value;
@@ -235,7 +234,7 @@ namespace dlib
 
     template <
         typename T
-        >    
+        >
     void median (
         T& one,
         T& two,
@@ -243,14 +242,14 @@ namespace dlib
     );
     /*!
         requires
-            - T implements operator< 
+            - T implements operator<
             - T is swappable by a global swap()
         ensures
-            - #one is the median 
-            - #one, #two, and #three is some permutation of one, two, and three.  
+            - #one is the median
+            - #one, #two, and #three is some permutation of one, two, and three.
     !*/
-    
-    
+
+
     template <
         typename T
         >
@@ -258,8 +257,8 @@ namespace dlib
         T& one,
         T& two,
         T& three
-    )    
-    {    
+    )
+    {
         using std::swap;
         using dlib::swap;
 
@@ -270,7 +269,7 @@ namespace dlib
             {
                 // one < two < three : two
                 swap(one,two);
-                
+
             }
             else
             {
@@ -281,7 +280,7 @@ namespace dlib
                     swap(three,one);
                 }
             }
-            
+
         }
         else
         {
@@ -300,7 +299,7 @@ namespace dlib
                     swap(three,one);
                 }
             }
-        }        
+        }
     }
 
 // ----------------------------------------------------------------------------------------
@@ -367,7 +366,7 @@ namespace dlib
         the member functions called swap) makes them compile right.
 
         So this is a workaround but not too ugly of one.  But hopefully I get get
-        rid of this in a few years.  So this function is already deprecated. 
+        rid of this in a few years.  So this function is already deprecated.
 
         This also means you should NOT use this function in your own code unless
         you have to support an old buggy compiler that benefits from this hack.
@@ -382,7 +381,7 @@ namespace dlib
 
     /*!A is_pointer_type
 
-        This is a template where is_pointer_type<T>::value == true when T is a pointer 
+        This is a template where is_pointer_type<T>::value == true when T is a pointer
         type and false otherwise.
     !*/
 
@@ -412,7 +411,7 @@ namespace dlib
 
     /*!A is_const_type
 
-        This is a template where is_const_type<T>::value == true when T is a const 
+        This is a template where is_const_type<T>::value == true when T is a const
         type and false otherwise.
     !*/
 
@@ -434,9 +433,9 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    /*!A is_reference_type 
+    /*!A is_reference_type
 
-        This is a template where is_reference_type<T>::value == true when T is a reference 
+        This is a template where is_reference_type<T>::value == true when T is a reference
         type and false otherwise.
     !*/
 
@@ -451,10 +450,10 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    /*!A is_same_type 
+    /*!A is_same_type
 
         This is a template where is_same_type<T,U>::value == true when T and U are the
-        same type and false otherwise.   
+        same type and false otherwise.
     !*/
 
     template <
@@ -495,7 +494,7 @@ namespace dlib
 
     /*!A is_convertible
 
-        This is a template that can be used to determine if one type is convertible 
+        This is a template that can be used to determine if one type is convertible
         into another type.
 
         For example:
@@ -523,7 +522,7 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
 
-    /*!A is_same_object 
+    /*!A is_same_object
 
         This is a templated function which checks if both of its arguments are actually
         references to the same object.  It returns true if they are and false otherwise.
@@ -534,31 +533,31 @@ namespace dlib
     template < typename T, typename U >
     typename disable_if_c<is_convertible<T*, U*>::value || is_convertible<U*,T*>::value, bool>::type
     is_same_object (
-        const T& a, 
+        const T& a,
         const U& b
-    ) 
-    { 
-        return ((void*)&a == (void*)&b); 
+    )
+    {
+        return ((void*)&a == (void*)&b);
     }
 
     // handle the case where T and U are related types because their pointers can be
-    // implicitly converted into one or the other.  E.g. a derived class and its base class. 
+    // implicitly converted into one or the other.  E.g. a derived class and its base class.
     // Or where both T and U are just the same type.  This way we make sure that if there is a
     // valid way to convert between these two pointer types then we will take that route rather
     // than the void* approach used otherwise.
     template < typename T, typename U >
     typename enable_if_c<is_convertible<T*, U*>::value || is_convertible<U*,T*>::value, bool>::type
     is_same_object (
-        const T& a, 
+        const T& a,
         const U& b
-    ) 
-    { 
-        return (&a == &b); 
+    )
+    {
+        return (&a == &b);
     }
 
 // ----------------------------------------------------------------------------------------
 
-    /*!A is_unsigned_type 
+    /*!A is_unsigned_type
 
         This is a template where is_unsigned_type<T>::value == true when T is an unsigned
         scalar type and false when T is a signed scalar type.
@@ -576,7 +575,7 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    /*!A is_signed_type 
+    /*!A is_signed_type
 
         This is a template where is_signed_type<T>::value == true when T is a signed
         scalar type and false when T is an unsigned scalar type.
@@ -598,7 +597,7 @@ namespace dlib
     {
     public:
         void operator() (
-            const T& source, 
+            const T& source,
             T& destination
         ) const
         {
@@ -617,14 +616,14 @@ namespace dlib
         for example:
             static_switch<1 + 1 == 2, 4 - 1 == 4>::value == 1  // because the first expression is true
             static_switch<1 + 1 == 3, 4 == 4>::value == 2      // because the second expression is true
-            static_switch<1 + 1 == 3, 4 == 5>::value == 0      // 0 here because none of them are true 
-            static_switch<1 + 1 == 2, 4 == 4>::value == compiler error  // because more than one expression is true 
+            static_switch<1 + 1 == 3, 4 == 5>::value == 0      // 0 here because none of them are true
+            static_switch<1 + 1 == 2, 4 == 4>::value == compiler error  // because more than one expression is true
     !*/
 
     template < bool v1 = 0, bool v2 = 0, bool v3 = 0, bool v4 = 0, bool v5 = 0,
-               bool v6 = 0, bool v7 = 0, bool v8 = 0, bool v9 = 0, bool v10 = 0, 
+               bool v6 = 0, bool v7 = 0, bool v8 = 0, bool v9 = 0, bool v10 = 0,
                bool v11 = 0, bool v12 = 0, bool v13 = 0, bool v14 = 0, bool v15 = 0 >
-    struct static_switch; 
+    struct static_switch;
 
     template <> struct static_switch<0,0,0,0,0,0,0,0,0,0,0,0,0,0,0> { const static int value = 0; };
     template <> struct static_switch<1,0,0,0,0,0,0,0,0,0,0,0,0,0,0> { const static int value = 1; };
@@ -645,12 +644,12 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
     /*!A is_built_in_scalar_type
-        
+
         This is a template that allows you to determine if the given type is a built
         in scalar type such as an int, char, float, short, etc.
 
         For example, is_built_in_scalar_type<char>::value == true
-        For example, is_built_in_scalar_type<std::string>::value == false 
+        For example, is_built_in_scalar_type<std::string>::value == false
     !*/
 
     template <typename T> struct is_built_in_scalar_type        { const static bool value = false; };
@@ -671,14 +670,14 @@ namespace dlib
     template <> struct is_built_in_scalar_type<unsigned char>   { const static bool value = true; };
     // Don't define one for wchar_t when using a version of visual studio
     // older than 8.0 (visual studio 2005) since before then they improperly set
-    // wchar_t to be a typedef rather than its own type as required by the C++ 
+    // wchar_t to be a typedef rather than its own type as required by the C++
     // standard.
 #if !defined(_MSC_VER) || _NATIVE_WCHAR_T_DEFINED
     template <> struct is_built_in_scalar_type<wchar_t>         { const static bool value = true; };
 #endif
 
 // ----------------------------------------------------------------------------------------
-    
+
     template <
         typename T
         >
@@ -701,10 +700,10 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    /*!A promote 
-        
+    /*!A promote
+
         This is a template that takes one of the built in scalar types and gives you another
-        scalar type that should be big enough to hold sums of values from the original scalar 
+        scalar type that should be big enough to hold sums of values from the original scalar
         type.  The new scalar type will also always be signed.
 
         For example, promote<uint16>::type == int32
@@ -721,7 +720,7 @@ namespace dlib
     template <> struct promote<long double,sizeof(long double)> { typedef long double type; };
 
 // ----------------------------------------------------------------------------------------
-    
+
     /*!A assign_zero_if_built_in_scalar_type
 
         This function assigns its argument the value of 0 if it is a built in scalar
@@ -755,8 +754,8 @@ namespace dlib
 
     template <typename T>
     T put_in_range (
-        const T& a, 
-        const T& b, 
+        const T& a,
+        const T& b,
         const T& val
     )
     /*!
@@ -765,7 +764,7 @@ namespace dlib
         ensures
             - if (val is within the range [a,b]) then
                 - returns val
-            - else 
+            - else
                 - returns the end of the range [a,b] that is closest to val
     !*/
     {
@@ -787,13 +786,13 @@ namespace dlib
         return val;
     }
 
-    // overload for double 
+    // overload for double
     inline double put_in_range(const double& a, const double& b, const double& val)
     { return put_in_range<double>(a,b,val); }
 
 // ----------------------------------------------------------------------------------------
 
-    /*!A tabs 
+    /*!A tabs
 
         This is a template to compute the absolute value a number at compile time.
 
@@ -824,7 +823,7 @@ namespace dlib
 
 // ----------------------------------------------------------------------------------------
 
-    /*!A tmin 
+    /*!A tmin
 
         This is a template to compute the min of two values at compile time
 
@@ -862,7 +861,7 @@ namespace dlib
             DLIB_MAKE_HAS_MEMBER_FUNCTION_TEST(has_print, void, print, (int))
 
         Then you can check if a class, T, has this method by looking at the boolean value:
-            has_print<T>::value 
+            has_print<T>::value
         which will be true if the member function is in the T class.
 
         Note that you can test for member functions taking no arguments by simply passing
@@ -873,55 +872,55 @@ namespace dlib
 
         To test for const member functions you would use a statement such as this:
             DLIB_MAKE_HAS_MEMBER_FUNCTION_TEST(has_print, void, print, ()const)
-        This would test for a member of the form: 
+        This would test for a member of the form:
             void print() const.
 
         To test for const templated member functions you would use a statement such as this:
             DLIB_MAKE_HAS_MEMBER_FUNCTION_TEST(has_print, void, template print<int>, ())
-        This would test for a member of the form: 
+        This would test for a member of the form:
             template <typename T> void print().
     !*/
 
 // ----------------------------------------------------------------------------------------
 
-    /*!A is_function 
-        
+    /*!A is_function
+
         This is a template that allows you to determine if the given type is a function.
 
         For example,
             void funct();
 
             is_built_in_scalar_type<funct>::value == true
-            is_built_in_scalar_type<int>::value == false 
+            is_built_in_scalar_type<int>::value == false
     !*/
 
     template <typename T> struct is_function { static const bool value = false; };
-    template <typename T> 
+    template <typename T>
     struct is_function<T (void)> { static const bool value = true; };
-    template <typename T, typename A0> 
+    template <typename T, typename A0>
     struct is_function<T (A0)> { static const bool value = true; };
-    template <typename T, typename A0, typename A1> 
+    template <typename T, typename A0, typename A1>
     struct is_function<T (A0, A1)> { static const bool value = true; };
-    template <typename T, typename A0, typename A1, typename A2> 
+    template <typename T, typename A0, typename A1, typename A2>
     struct is_function<T (A0, A1, A2)> { static const bool value = true; };
-    template <typename T, typename A0, typename A1, typename A2, typename A3> 
+    template <typename T, typename A0, typename A1, typename A2, typename A3>
     struct is_function<T (A0, A1, A2, A3)> { static const bool value = true; };
-    template <typename T, typename A0, typename A1, typename A2, typename A3, typename A4> 
+    template <typename T, typename A0, typename A1, typename A2, typename A3, typename A4>
     struct is_function<T (A0, A1, A2, A3, A4)> { static const bool value = true; };
     template <typename T, typename A0, typename A1, typename A2, typename A3, typename A4,
-                          typename A5> 
+                          typename A5>
     struct is_function<T (A0,A1,A2,A3,A4,A5)> { static const bool value = true; };
     template <typename T, typename A0, typename A1, typename A2, typename A3, typename A4,
-                          typename A5, typename A6> 
+                          typename A5, typename A6>
     struct is_function<T (A0,A1,A2,A3,A4,A5,A6)> { static const bool value = true; };
     template <typename T, typename A0, typename A1, typename A2, typename A3, typename A4,
-                          typename A5, typename A6, typename A7> 
+                          typename A5, typename A6, typename A7>
     struct is_function<T (A0,A1,A2,A3,A4,A5,A6,A7)> { static const bool value = true; };
     template <typename T, typename A0, typename A1, typename A2, typename A3, typename A4,
-                          typename A5, typename A6, typename A7, typename A8> 
+                          typename A5, typename A6, typename A7, typename A8>
     struct is_function<T (A0,A1,A2,A3,A4,A5,A6,A7,A8)> { static const bool value = true; };
     template <typename T, typename A0, typename A1, typename A2, typename A3, typename A4,
-                          typename A5, typename A6, typename A7, typename A8, typename A9> 
+                          typename A5, typename A6, typename A7, typename A8, typename A9>
     struct is_function<T (A0,A1,A2,A3,A4,A5,A6,A7,A8,A9)> { static const bool value = true; };
 
 
@@ -974,12 +973,12 @@ namespace dlib
         T (&f)(A0,A1,A2,A3,A4);
     };
 
-    /*!A wrap_function 
-        
-        This is a template that allows you to turn a global function into a 
+    /*!A wrap_function
+
+        This is a template that allows you to turn a global function into a
         function object.  The reason for this template's existance is so you can
         do stuff like this:
-            
+
             template <typename T>
             void call_funct(const T& funct)
             {  cout << funct(); }
@@ -992,7 +991,7 @@ namespace dlib
             }
 
         The above code doesn't work right on some compilers if you don't
-        use wrap_function.  
+        use wrap_function.
     !*/
 
     template <typename T>
@@ -1040,19 +1039,19 @@ namespace dlib
 
         // You obviously can't have a block of memory that has zero bytes in it.
         COMPILE_TIME_ASSERT(bSIZE > 0);
-        
+
         union mem_block
         {
-            // All of this garbage is to make sure this union is properly aligned 
+            // All of this garbage is to make sure this union is properly aligned
             // (a union is always aligned such that everything in it would be properly
-            // aligned.  So the assumption here is that one of these objects has 
+            // aligned.  So the assumption here is that one of these objects has
             // a large enough alignment requirement to satisfy any object this
             // block of memory might be cast into).
             void* void_ptr;
             int integer;
             struct {
                 void (stack_based_memory_block::*callback)();
-                stack_based_memory_block* o; 
+                stack_based_memory_block* o;
             } stuff;
             long double more_stuff;
 
@@ -1060,18 +1059,18 @@ namespace dlib
             uint32 var2;
             double var3;
 
-            char data[size]; 
+            char data[size];
         } mem;
 
         // The reason for having this variable is that doing it this way avoids
         // warnings from gcc about violations of strict-aliasing rules.
-        void* const data; 
+        void* const data;
     };
 
 // ----------------------------------------------------------------------------------------
 
     template <
-        typename T, 
+        typename T,
         typename F
         >
     auto max_scoring_element(
@@ -1112,11 +1111,11 @@ namespace dlib
 // ----------------------------------------------------------------------------------------
 
     template <
-        typename T, 
+        typename T,
         typename F
         >
     auto min_scoring_element(
-        const T& container, 
+        const T& container,
         F score_func
     ) -> decltype(std::make_pair(*container.begin(), 0.0))
     /*!
