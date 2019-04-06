@@ -48,19 +48,6 @@ set(DLIB_VERSION ${VERSION} PARENT_SCOPE)
 
 set (BUILDING_PYTHON_IN_MSVC false)
 
-# Check if we are being built as part of a pybind11 module.
-if (COMMAND pybind11_add_module)
-   set(CMAKE_POSITION_INDEPENDENT_CODE True)
-   if (CMAKE_COMPILER_IS_GNUCXX)
-      # Just setting CMAKE_POSITION_INDEPENDENT_CODE should be enough to set
-      # -fPIC for GCC but sometimes it still doesn't get set, so make sure it
-      # does.
-      add_definitions("-fPIC")
-   endif()
-   # Make DLIB_ASSERT statements not abort the python interpreter, but just return an error.
-   list(APPEND active_preprocessor_switches "-DDLIB_NO_ABORT_ON_2ND_FATAL_ERROR")
-endif()
-
 # DLIB_IN_PROJECT_BUILD==true means you are using dlib by invoking
 # add_subdirectory(dlib) in the parent project. In this case, we always want
 # to build dlib as a static library so the parent project doesn't need to
@@ -233,26 +220,10 @@ if (NOT TARGET dlib)
    target_link_libraries(dlib PUBLIC ${dlib_needed_libraries})
    target_compile_options(dlib PUBLIC ${active_preprocessor_switches})
 
-
-   # Allow the unit tests to ask us to compile the all/source.cpp file just to make sure it compiles.
-   if (DLIB_TEST_COMPILE_ALL_SOURCE_CPP)
-      add_library(dlib_all_source_cpp STATIC all/source.cpp)
-      target_link_libraries(dlib_all_source_cpp dlib)
-      target_compile_options(dlib_all_source_cpp PUBLIC ${active_preprocessor_switches})
-      enable_cpp11_for_target(dlib_all_source_cpp)
-   endif()
-
    enable_cpp11_for_target(dlib)
    target_compile_options(dlib PUBLIC $<$<COMPILE_LANGUAGE:CXX>:${active_compile_opts}>)
    target_compile_options(dlib PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${active_compile_opts_private}>)
 
-endif()
-
-# Check if we are being built as part of a pybind11 module.
-if (COMMAND pybind11_add_module)
-   # Don't export unnecessary symbols.
-   set_target_properties(dlib PROPERTIES CXX_VISIBILITY_PRESET "hidden")
-   set_target_properties(dlib PROPERTIES CUDA_VISIBILITY_PRESET "hidden")
 endif()
 
 add_library(dlib::dlib ALIAS dlib)
