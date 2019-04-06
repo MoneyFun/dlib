@@ -39,8 +39,10 @@ if (POLICY CMP0075)
    cmake_policy(SET CMP0075 NEW)
 endif()
 
-# default to a Release build (except if CMAKE_BUILD_TYPE is set)
-include(cmake_utils/release_build_by_default)
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+   "Choose the type of build, options are: Debug Release
+   RelWithDebInfo MinSizeRel." FORCE)
+
 include(cmake_utils/use_cpp_11.cmake)
 
 # Set DLIB_VERSION in the including CMake file so they can use it to do whatever they want.
