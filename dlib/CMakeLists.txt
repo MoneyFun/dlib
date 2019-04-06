@@ -39,44 +39,53 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING
    "Choose the type of build, options are: Debug Release
    RelWithDebInfo MinSizeRel." FORCE)
 
-include(cmake_utils/use_cpp_11.cmake)
+function(enable_cpp11_for_target target_name)
+
+set(COMPILER_CAN_DO_CPP_11 1)
+# Tell cmake that we need C++11 for dlib
+target_compile_features(${target_name}
+   PUBLIC
+      cxx_rvalue_references
+      cxx_variadic_templates
+      cxx_lambdas
+      cxx_defaulted_move_initializers
+      cxx_delegating_constructors
+      cxx_thread_local
+      cxx_constexpr
+      # cxx_decltype_incomplete_return_types  # purposfully commented out because cmake errors out on this when using visual studio and cmake 3.8.0
+      cxx_auto_type
+   )
+
+message(STATUS "C++11 activated.")
+
+
+endfunction()
 
 # Set DLIB_VERSION in the including CMake file so they can use it to do whatever they want.
 set(DLIB_VERSION ${VERSION} PARENT_SCOPE)
 
-# Don't try to call add_library(dlib) and setup dlib's stuff if it has already
-# been done by some other part of the current cmake project.  We do this
-# because it avoids getting warnings/errors about cmake policy CMP0002.  This
-# happens when a project tries to call add_subdirectory() on dlib more than
-# once.  This most often happens when the top level of a project depends on two
-# or more other things which both depend on dlib.
-if (NOT TARGET dlib)
-
-   set(source_files
-      base64/base64_kernel_1.cpp
-      bigint/bigint_kernel_1.cpp
-      bigint/bigint_kernel_2.cpp
-      bit_stream/bit_stream_kernel_1.cpp
-      entropy_decoder/entropy_decoder_kernel_1.cpp
-      entropy_decoder/entropy_decoder_kernel_2.cpp
-      entropy_encoder/entropy_encoder_kernel_1.cpp
-      entropy_encoder/entropy_encoder_kernel_2.cpp
-      tokenizer/tokenizer_kernel_1.cpp
-      unicode/unicode.cpp
-      )
+set(source_files
+   base64/base64_kernel_1.cpp
+   bigint/bigint_kernel_1.cpp
+   bigint/bigint_kernel_2.cpp
+   bit_stream/bit_stream_kernel_1.cpp
+   entropy_decoder/entropy_decoder_kernel_1.cpp
+   entropy_decoder/entropy_decoder_kernel_2.cpp
+   entropy_encoder/entropy_encoder_kernel_1.cpp
+   entropy_encoder/entropy_encoder_kernel_2.cpp
+   tokenizer/tokenizer_kernel_1.cpp
+   unicode/unicode.cpp
+   )
 
 
-   # Tell CMake to build dlib via add_library()/cuda_add_library()
-   add_library(dlib ${source_files} )
+# Tell CMake to build dlib via add_library()/cuda_add_library()
+add_library(dlib ${source_files} )
 
-   target_include_directories(dlib
-      INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
-      )
+target_include_directories(dlib
+   INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+   )
 
-   enable_cpp11_for_target(dlib)
-   target_compile_options(dlib PUBLIC $<$<COMPILE_LANGUAGE:CXX>:${active_compile_opts}>)
-   target_compile_options(dlib PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${active_compile_opts_private}>)
+enable_cpp11_for_target(dlib)
 
-endif()
 
 add_library(dlib::dlib ALIAS dlib)
