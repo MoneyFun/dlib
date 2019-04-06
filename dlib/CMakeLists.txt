@@ -22,8 +22,6 @@ set(VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPAC
 message(STATUS "Using CMake version: ${CMAKE_VERSION}")
 message(STATUS "Compiling dlib version: ${VERSION}")
 
-include(cmake_utils/set_compiler_specific_options.cmake)
-
 
 # Adhere to GNU filesystem layout conventions
 include(GNUInstallDirs)
@@ -68,42 +66,12 @@ if (NOT TARGET dlib)
       )
 
 
-   set(dlib_needed_libraries)
-   set(dlib_needed_includes)
-
-   if(UNIX)
-      set(CMAKE_THREAD_PREFER_PTHREAD ON)
-      find_package(Threads REQUIRED)
-      set(dlib_needed_libraries ${dlib_needed_libraries} ${CMAKE_THREAD_LIBS_INIT})
-   endif()
-
-   # link to the nsl library if it exists.  this is something you need sometimes
-   find_library(nsllib nsl)
-   if (nsllib)
-      set (dlib_needed_libraries ${dlib_needed_libraries} ${nsllib})
-   endif ()
-
-   # link to the socket library if it exists.  this is something you need on solaris
-   find_library(socketlib socket)
-   if (socketlib)
-      set (dlib_needed_libraries ${dlib_needed_libraries} ${socketlib})
-   endif ()
-
-   mark_as_advanced(nsllib pthreadlib socketlib)
-
-   INCLUDE (CheckFunctionExists)
-
-
    # Tell CMake to build dlib via add_library()/cuda_add_library()
    add_library(dlib ${source_files} )
 
    target_include_directories(dlib
       INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
-      INTERFACE $<INSTALL_INTERFACE:include>
-      PUBLIC ${dlib_needed_includes}
       )
-   target_link_libraries(dlib PUBLIC ${dlib_needed_libraries})
-   target_compile_options(dlib PUBLIC ${active_preprocessor_switches})
 
    enable_cpp11_for_target(dlib)
    target_compile_options(dlib PUBLIC $<$<COMPILE_LANGUAGE:CXX>:${active_compile_opts}>)
