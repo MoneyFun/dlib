@@ -76,14 +76,17 @@ int main()
             // Find the pose of each face.
             // std::vector<full_object_detection> shapes;
 
-            for (unsigned long i = 0; i < faces.size(); ++i)
+            for (unsigned long i = 0; i < faces.size(); ++i){
                 //pose_model(cimg, faces[i]);
                 detect_result = pose_model(cimg, faces[i]);
                 for (char j = 0; j < detect_result.num_parts(); j++) {
                     p = detect_result.part(j);
-                    cv::circle(temp, cv::Point(p.x(), p.y()), 3, cv::Scalar(255,0,0), -1);
+                    cv::circle(temp, cv::Point(p.x(), p.y()), 3, cv::Scalar(0,0,255), -1);
                 }
-            // render_face_detections(shapes);
+                rectangle rect = detect_result.get_rect();
+                cv::rectangle(temp, cv::Point(rect.left(), rect.top()), cv::Point(rect.right(), rect.bottom()),
+                    cv::Scalar(255,0,0),1,8,0);
+            }
 
             // Display it all on the screen
             cv::imshow("dlib", temp);
